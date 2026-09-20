@@ -1,0 +1,155 @@
+{
+  "app": {
+    "title": "Courier 35: Izmir Shift",
+    "description": "An arcade motorcycle courier shift in Izmir traffic from day to night."
+  },
+  "menu": {
+    "badge": "IZMIR · 35",
+    "title_main": "COURIER",
+    "title_sub": "35",
+    "tagline": "IZMIR SHIFT",
+    "desc_1": "A shift living from day till night.",
+    "desc_2": "Speed increases sharply with throttle. Brake to hold your line.",
+    "start_shift": "START SHIFT",
+    "controls_throttle": "W / ↑ GAS · S / ↓ / SPACE BRAKE",
+    "controls_steer": "A D / ← → LANE",
+    "controls_nos": "SHIFT NOS · P / ESC PAUSE",
+    "badge_count": "BADGE",
+    "high_score": "RECORD",
+    "best_deliveries": "BEST DELIVERIES",
+    "author_twitter": "@tahsingibi",
+    "author_site": "sungur.dev"
+  },
+  "story": {
+    "badge": "DISPATCH",
+    "center_title": "DISPATCH HQ",
+    "btn_next": "CONTINUE",
+    "btn_start": "START ENGINE",
+    "hint": "Tap or press Enter",
+    "page_1_tag": "17:12 · KONAK",
+    "page_1_title": "Evening shift begins.",
+    "page_1_line_1": "The bay breeze is on the Kordon, traffic is building up.",
+    "page_1_line_2": "As the shift progresses, night will fall, then dawn.",
+    "page_2_tag": "17:15 · HQ",
+    "page_2_title": "Find your rhythm first.",
+    "page_2_line_1": "The bike starts low and accelerates steadily.",
+    "page_2_line_2": "Crashes or repeated violations alert the police.",
+    "page_3_tag": "17:18 · IGNITION",
+    "page_3_title": "Deliveries are waiting.",
+    "page_3_line_1": "W / ↑ throttle · S / ↓ / Space brake · Shift NOS.",
+    "page_3_line_2": "On mobile: use directional buttons to change lanes; control speed with gas, brake and NOS."
+  },
+  "hud": {
+    "delivery": "DELIVERY",
+    "score": "SCORE",
+    "health": "HEALTH",
+    "nos": "NOS",
+    "boost": "BOOST",
+    "police_pursuit": "POLICE PURSUIT",
+    "clean_left": "{seconds}s clean",
+    "losing_trace": "LOSING TRAIL",
+    "clean_drive": "Clean ride",
+    "last_violation": "Last violation: {reason}",
+    "arrest_rate": "arrest {rate}%",
+    "combo": "x{count} COMBO",
+    "touch_brake": "BRAKE",
+    "touch_throttle": "GAS",
+    "touch_steer_hint": "← lane →"
+  },
+  "pause": {
+    "badge": "SHIFT ON HOLD",
+    "title": "PAUSED",
+    "desc": "Game time, traffic and pursuit are frozen.",
+    "resume": "RESUME",
+    "shortcut": "P / ESC / ENTER",
+    "controls": "W gas · Space brake · Shift NOS"
+  },
+  "settings": {
+    "title": "SETTINGS",
+    "controls_layout": "Controls Layout",
+    "layout_left": "Left: Steer · Right: Pedals",
+    "layout_right": "Left: Pedals · Right: Steer",
+    "steer_left": "Steer Left",
+    "steer_right": "Steer Right"
+  },
+  "game_over": {
+    "busted_badge": "POLICE REPORT",
+    "crash_badge": "CRASH REPORT",
+    "busted_title": "BUSTED",
+    "crash_title": "SHIFT OVER",
+    "busted_desc": "The police intercepted your route.",
+    "crash_desc": "Bike is totaled.",
+    "score": "SCORE",
+    "deliveries": "DELIVERIES",
+    "violations": "VIOLATIONS",
+    "last_record": "LAST RECORD",
+    "restart": "NEW SHIFT",
+    "share_button": "SHARE SCORE",
+    "author_twitter": "@tahsingibi",
+    "author_site": "sungur.dev"
+  },
+  "share": {
+    "modal_title": "Share Your Score",
+    "modal_subtitle": "Show your shift results to your friends!",
+    "x_button": "Share on X (Twitter)",
+    "story_button": "Instagram Story Image",
+    "download_card": "Download Image",
+    "copy_link": "Copy Link",
+    "link_copied": "Link copied!",
+    "tweet_text": "I got {score} points and {deliveries} deliveries in Courier 35: Izmir Shift! Can you beat it? @tahsingibi",
+    "close": "Close"
+  },
+  "phases": {
+    "konak": { "name": "KONAK", "sub": "Clock Tower · Cankaya" },
+    "kordon": { "name": "ALSANCAK", "sub": "Kordon · Port line" },
+    "altinyol": { "name": "ALTINYOL", "sub": "Bayrakli · Karsiyaka route" },
+    "karsiyaka": { "name": "KARSIYAKA", "sub": "Bostanli coastal traffic" },
+    "cevre_yolu": { "name": "RING ROAD", "sub": "O-30 Highway ring" }
+  },
+  "time_phases": {
+    "safak": "DAWN",
+    "gunduz": "DAY",
+    "aksam": "DUSK",
+    "gece": "NIGHT"
+  },
+  "time_banners": {
+    "gece_title": "Night fell",
+    "gece_sub": "Headlights and street lights on.",
+    "safak_title": "Dawn breaks",
+    "safak_sub": "Light comes over the bay, Izmir awakens.",
+    "gunduz_title": "Day begins",
+    "gunduz_sub": "Traffic density steadily rises.",
+    "aksam_title": "Evening rush",
+    "aksam_sub": "Kordon lights will turn on shortly.",
+    "contact_title": "Ignition on",
+    "contact_sub": "Throttle to accelerate. Brake to pace."
+  },
+  "missions": {
+    "m1_title": "Konak opening",
+    "m1_desc": "Complete 2 deliveries",
+    "m2_title": "Kordon run",
+    "m2_desc": "3 deliveries in 75s",
+    "m3_title": "Silent ride",
+    "m3_desc": "Ride 25s without violation",
+    "m4_title": "Altinyol crossing",
+    "m4_desc": "Reach 9 total deliveries",
+    "m5_title": "Karsiyaka shift",
+    "m5_desc": "Reach 14 total deliveries"
+  },
+  "achievements": {
+    "first": { "title": "First Delivery", "sub": "Delivered your first parcel." },
+    "combo": { "title": "Streak Began", "sub": "Gathered 3 deliveries in a streak." },
+    "speed": { "title": "100 Club", "sub": "Maintained 100+ km/h without NOS." },
+    "clean": { "title": "Clean Drive", "sub": "Drove 30s without violation." },
+    "escape": { "title": "Trail Blazer", "sub": "Evaded police with clean driving." },
+    "trap": { "title": "Traffic Weaver", "sub": "Trapped pursuers into traffic." },
+    "ten": { "title": "Double Digits", "sub": "Reached 10 deliveries in one shift." },
+    "master": { "title": "Shift Master", "sub": "Completed all route missions." }
+  },
+  "pwa": {
+    "install_prompt": "Install App on Device",
+    "install_btn": "Install",
+    "offline_ready": "Playable Offline",
+    "close": "Close"
+  }
+}

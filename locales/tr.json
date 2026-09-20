@@ -1,0 +1,155 @@
+{
+  "app": {
+    "title": "Kurye 35: İzmir Vardiyası",
+    "description": "İzmir trafiğinde gündüzden geceye yaşayan kurye arcade oyunu."
+  },
+  "menu": {
+    "badge": "İZMİR · 35",
+    "title_main": "KURYE",
+    "title_sub": "35",
+    "tagline": "İZMİR VARDİYASI",
+    "desc_1": "Gündüzden geceye yaşayan bir vardiya.",
+    "desc_2": "Gazı açınca hız farkı belirgin. Frenle çizgini koru.",
+    "start_shift": "VARDİYAYI BAŞLAT",
+    "controls_throttle": "W / ↑ GAZ · S / ↓ / SPACE FREN",
+    "controls_steer": "A D / ← → ŞERİT",
+    "controls_nos": "SHIFT NOS · P / ESC PAUSE",
+    "badge_count": "ROZET",
+    "high_score": "REKOR",
+    "best_deliveries": "EN İYİ TESLİMAT",
+    "author_twitter": "@tahsingibi",
+    "author_site": "sungur.dev"
+  },
+  "story": {
+    "badge": "DISPATCH",
+    "center_title": "MERKEZ",
+    "btn_next": "DEVAM",
+    "btn_start": "KONTAĞI AÇ",
+    "hint": "Dokun veya Enter",
+    "page_1_tag": "17:12 · KONAK",
+    "page_1_title": "Akşam vardiyası başladı.",
+    "page_1_line_1": "Kordon'da körfez rüzgarı var, trafik yoğunlaşıyor.",
+    "page_1_line_2": "Vardiya ilerledikçe geceye, sonra sabaha dönecek.",
+    "page_2_tag": "17:15 · MERKEZ",
+    "page_2_title": "Önce ritmi bul.",
+    "page_2_line_1": "Motor düşük hızla başlar ve kademeli hızlanır.",
+    "page_2_line_2": "Kaza veya tekrarlanan tehlikeli sürüş polisi çağırır.",
+    "page_3_tag": "17:18 · KONTAK",
+    "page_3_title": "Teslimatlar bekliyor.",
+    "page_3_line_1": "W / ↑ gaz · S / ↓ / Space fren · Shift NOS.",
+    "page_3_line_2": "Mobilde yön butonları ile şerit değiştir; gaz, fren ve NOS ile hızı yönet."
+  },
+  "hud": {
+    "delivery": "TESLİMAT",
+    "score": "PUAN",
+    "health": "SAĞLIK",
+    "nos": "NOS",
+    "boost": "BOOST",
+    "police_pursuit": "POLİS TAKİBİ",
+    "clean_left": "{seconds}s temiz",
+    "losing_trace": "İZ KAYBOLUYOR",
+    "clean_drive": "Temiz sürüş",
+    "last_violation": "Son ihlal: {reason}",
+    "arrest_rate": "yakalanma %{rate}",
+    "combo": "x{count} SERİ",
+    "touch_brake": "FREN",
+    "touch_throttle": "GAZ",
+    "touch_steer_hint": "← şerit →"
+  },
+  "pause": {
+    "badge": "VARDİYA BEKLEMEDE",
+    "title": "DURAKLATILDI",
+    "desc": "Oyun zamanı, trafik ve polis takibi tamamen durdu.",
+    "resume": "DEVAM ET",
+    "shortcut": "P / ESC / ENTER",
+    "controls": "W gaz · Space fren · Shift NOS"
+  },
+  "settings": {
+    "title": "AYARLAR",
+    "controls_layout": "Kontrol Düzeni",
+    "layout_left": "Sol: Yön · Sağ: Pedal",
+    "layout_right": "Sol: Pedal · Sağ: Yön",
+    "steer_left": "Yön Sol",
+    "steer_right": "Yön Sağ"
+  },
+  "game_over": {
+    "busted_badge": "POLİS RAPORU",
+    "crash_badge": "KAZA RAPORU",
+    "busted_title": "YAKALANDIN",
+    "crash_title": "VARDİYA BİTTİ",
+    "busted_desc": "Polis rotanı kesti.",
+    "crash_desc": "Motor devam edemeyecek durumda.",
+    "score": "SKOR",
+    "deliveries": "TESLİMAT",
+    "violations": "İHLAL",
+    "last_record": "SON KAYIT",
+    "restart": "YENİ VARDİYA",
+    "share_button": "SKORU PAYLAŞ",
+    "author_twitter": "@tahsingibi",
+    "author_site": "sungur.dev"
+  },
+  "share": {
+    "modal_title": "Skorunu Paylaş",
+    "modal_subtitle": "Vardiya sonucunu arkadaşlarınla paylaş!",
+    "x_button": "X (Twitter)'da Paylaş",
+    "story_button": "Instagram Hikaye Görseli",
+    "download_card": "Görseli İndir",
+    "copy_link": "Bağlantıyı Kopyala",
+    "link_copied": "Bağlantı kopyalandı!",
+    "tweet_text": "Kurye 35: İzmir Vardiyası'nda {score} puan ve {deliveries} teslimat yaptım! Sıra sende: @tahsingibi",
+    "close": "Kapat"
+  },
+  "phases": {
+    "konak": { "name": "KONAK", "sub": "Saat Kulesi · Çankaya" },
+    "kordon": { "name": "ALSANCAK", "sub": "Kordon · Liman hattı" },
+    "altinyol": { "name": "ALTINYOL", "sub": "Bayraklı · Karşıyaka yönü" },
+    "karsiyaka": { "name": "KARŞIYAKA", "sub": "Bostanlı sahil hattı" },
+    "cevre_yolu": { "name": "ÇEVRE YOLU", "sub": "O-30 Çevre Yolu ringi" }
+  },
+  "time_phases": {
+    "safak": "ŞAFAK",
+    "gunduz": "GÜNDÜZ",
+    "aksam": "AKŞAM",
+    "gece": "GECE"
+  },
+  "time_banners": {
+    "gece_title": "Gece çöktü",
+    "gece_sub": "Farlar ve sokak ışıkları devrede.",
+    "safak_title": "Şafak söküyor",
+    "safak_sub": "Körfez üzerinden ışık geliyor, İzmir uyanıyor.",
+    "gunduz_title": "Gün başladı",
+    "gunduz_sub": "Trafik yoğunluğu yavaşça artıyor.",
+    "aksam_title": "Akşam trafiği",
+    "aksam_sub": "Kordon'da ışıklar birazdan yanacak.",
+    "contact_title": "Kontak açık",
+    "contact_sub": "Gaz vererek hızlan. Frenle ritmi kontrol et."
+  },
+  "missions": {
+    "m1_title": "Konak açılışı",
+    "m1_desc": "2 teslimat tamamla",
+    "m2_title": "Kordon hattı",
+    "m2_desc": "75 saniyede 3 teslimat",
+    "m3_title": "Sessiz sürüş",
+    "m3_desc": "25 saniye ihlal yapmadan sür",
+    "m4_title": "Altınyol geçişi",
+    "m4_desc": "Toplam 9 teslimata ulaş",
+    "m5_title": "Karşıyaka vardiyası",
+    "m5_desc": "Toplam 14 teslimata ulaş"
+  },
+  "achievements": {
+    "first": { "title": "İlk Teslimat", "sub": "İlk paketi yerine ulaştırdın." },
+    "combo": { "title": "Seri Başladı", "sub": "3 teslimatı seri halinde topladın." },
+    "speed": { "title": "100 Kulübü", "sub": "NOS olmadan 100 km/h üstünde kaldın." },
+    "clean": { "title": "Temiz Sürüş", "sub": "30 saniye ihlal yapmadan sürdün." },
+    "escape": { "title": "İz Kaybettiren", "sub": "Polisi temiz sürüşle atlattın." },
+    "trap": { "title": "Makas Ustası", "sub": "Takipteki polisi trafiğe düşürdün." },
+    "ten": { "title": "Çift Hane", "sub": "Tek vardiyada 10 teslimata ulaştın." },
+    "master": { "title": "Vardiya Ustası", "sub": "Bütün rota görevlerini tamamladın." }
+  },
+  "pwa": {
+    "install_prompt": "Uygulamayı Cihazına Yükle",
+    "install_btn": "Yükle",
+    "offline_ready": "Çevrimdışı Oynanabilir",
+    "close": "Kapat"
+  }
+}
