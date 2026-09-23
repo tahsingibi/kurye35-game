@@ -70,7 +70,16 @@
     "layout_left": "Sol: Yön · Sağ: Pedal",
     "layout_right": "Sol: Pedal · Sağ: Yön",
     "steer_left": "Yön Sol",
-    "steer_right": "Yön Sağ"
+    "steer_right": "Yön Sağ",
+    "button_size": "Kontrol Buton Boyutu",
+    "size_small": "Küçük",
+    "size_medium": "Orta",
+    "size_large": "Büyük",
+    "sound_effects": "Ses Efektleri",
+    "sound_on": "Açık",
+    "sound_off": "Kapalı",
+    "open_settings": "Ayarlar",
+    "close": "Kapat"
   },
   "game_over": {
     "busted_badge": "POLİS RAPORU",

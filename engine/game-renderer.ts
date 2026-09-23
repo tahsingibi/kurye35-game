@@ -104,7 +104,9 @@ export function renderGameView(ctx: CanvasRenderingContext2D, engine: GameEngine
       engine.lastViolation,
       engine.combo,
       engine.isTouchDevice,
-      engine.controls
+      engine.controls,
+      engine.joystickPosition,
+      engine.buttonSize
     );
   }
 

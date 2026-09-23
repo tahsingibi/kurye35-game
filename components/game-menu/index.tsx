@@ -14,6 +14,7 @@ interface GameMenuProps {
   unlockedCount: number;
   joystickPosition?: JoystickPosition;
   onChangeJoystickPosition?: (pos: JoystickPosition) => void;
+  onOpenSettings?: () => void;
 }
 
 export const GameMenu: React.FC<GameMenuProps> = ({
@@ -21,18 +22,13 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   highScore,
   bestDeliveries,
   unlockedCount,
-  joystickPosition = "left",
-  onChangeJoystickPosition,
+  onOpenSettings,
 }) => {
   const totalBadges = Object.keys(ACHIEVEMENTS_DATA).length;
 
-  const toggleJoystick = () => {
-    onChangeJoystickPosition?.(joystickPosition === "left" ? "right" : "left");
-  };
-
   return (
     <div className="absolute inset-0 z-40 flex flex-col justify-between p-6 pointer-events-auto select-none bg-gradient-to-b from-transparent via-black/25 to-black/85 transition-opacity duration-300">
-      {/* Üst Kısım: Logo, Rozet ve Hızlı Kontrol Düzeni Ayarı */}
+      {/* Üst Kısım: Logo, Rozet ve Ayarlar Butonu */}
       <div className="pt-3 flex items-center justify-between">
         <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 border border-teal-500/30 backdrop-blur-md shadow-lg shadow-teal-500/10">
           <div className="relative w-5 h-5 rounded-full overflow-hidden border border-teal-400/50">
@@ -49,15 +45,14 @@ export const GameMenu: React.FC<GameMenuProps> = ({
           </span>
         </div>
 
-        {/* Hızlı Kontrol Düzeni Ayarı */}
+        {/* Ayarlar Butonu */}
         <button
-          onClick={toggleJoystick}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/80 border border-slate-700/60 text-slate-300 hover:text-white text-[11px] font-black tracking-wider transition active:scale-95 shadow-md"
+          onClick={onOpenSettings}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/80 border border-slate-700/60 text-slate-300 hover:text-white text-[11px] font-black tracking-wider transition active:scale-95 shadow-md"
+          aria-label={t("settings.open_settings")}
         >
-          <span>🕹️</span>
-          <span>
-            {joystickPosition === "left" ? t("settings.steer_left") : t("settings.steer_right")}
-          </span>
+          <span>⚙️</span>
+          <span>{t("settings.open_settings")}</span>
         </button>
       </div>
 

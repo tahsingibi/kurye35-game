@@ -9,18 +9,28 @@ import { GameStory } from "@/components/game-story";
 import { GamePause } from "@/components/game-pause";
 import { GameOver } from "@/components/game-over";
 import { ShareModal } from "@/components/share-modal";
+import { SettingsModal } from "@/components/settings-modal";
 import { PwaInstaller } from "@/components/pwa-installer";
+import { setSoundMuted } from "@/engine/audio";
 import {
   getJoystickPosition,
   setJoystickPosition as saveJoystickPosition,
+  getButtonSize,
+  setButtonSize as saveButtonSize,
+  getSoundEnabled,
+  setSoundEnabled as saveSoundEnabled,
   JoystickPosition,
+  ButtonSize,
 } from "@/utils/settings";
 
 export const GameContainer: React.FC = () => {
   const engine = useMemo(() => new GameEngine(), []);
   const [gameState, setGameState] = useState<GameStateEnum>(GameStateEnum.MENU);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [controlsLayout, setControlsLayout] = useState<JoystickPosition>(getJoystickPosition);
+  const [buttonSize, setButtonSize] = useState<ButtonSize>(getButtonSize);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(getSoundEnabled);
   const [, setTick] = useState(0);
 
   engine.onStateChange = (nextState: GameStateEnum) => {
@@ -31,6 +41,17 @@ export const GameContainer: React.FC = () => {
   const handleLayoutChange = (pos: JoystickPosition) => {
     setControlsLayout(pos);
     saveJoystickPosition(pos);
+  };
+
+  const handleButtonSizeChange = (size: ButtonSize) => {
+    setButtonSize(size);
+    saveButtonSize(size);
+  };
+
+  const handleSoundChange = (enabled: boolean) => {
+    setSoundEnabled(enabled);
+    saveSoundEnabled(enabled);
+    setSoundMuted(!enabled);
   };
 
   const handleStartShift = () => {
@@ -63,6 +84,7 @@ export const GameContainer: React.FC = () => {
           engine={engine}
           isPlaying={gameState === GameStateEnum.PLAYING}
           controlsLayout={controlsLayout}
+          buttonSize={buttonSize}
         />
 
         {/* UI Katmanları */}
@@ -74,6 +96,7 @@ export const GameContainer: React.FC = () => {
             unlockedCount={engine.unlockedAchievements.size}
             joystickPosition={controlsLayout}
             onChangeJoystickPosition={handleLayoutChange}
+            onOpenSettings={() => setIsSettingsOpen(true)}
           />
         )}
 
@@ -92,6 +115,7 @@ export const GameContainer: React.FC = () => {
             speed={engine.displaySpeed}
             joystickPosition={controlsLayout}
             onChangeJoystickPosition={handleLayoutChange}
+            onOpenSettings={() => setIsSettingsOpen(true)}
           />
         )}
 
@@ -122,6 +146,18 @@ export const GameContainer: React.FC = () => {
           onClose={() => setIsShareOpen(false)}
         />
       )}
+
+      {/* Ayarlar Modalı */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        joystickPosition={controlsLayout}
+        onChangeJoystickPosition={handleLayoutChange}
+        buttonSize={buttonSize}
+        onChangeButtonSize={handleButtonSizeChange}
+        soundEnabled={soundEnabled}
+        onChangeSoundEnabled={handleSoundChange}
+      />
 
       {/* PWA Yükleme ve Çevrimdışı Bildirimi */}
       <PwaInstaller />

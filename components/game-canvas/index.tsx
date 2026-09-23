@@ -7,19 +7,23 @@ import { InputManager } from "@/engine/input";
 import { renderGameView, renderBackground } from "@/engine/game-renderer";
 import { GameStateEnum } from "@/engine/types";
 import { TouchControls } from "@/components/touch-controls";
-import { JoystickPosition } from "@/utils/settings";
+import { JoystickPosition, ButtonSize } from "@/utils/settings";
 
 interface GameCanvasProps {
   engine: GameEngine;
   isPlaying?: boolean;
   controlsLayout?: JoystickPosition;
+  buttonSize?: ButtonSize;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
   engine,
   isPlaying = false,
   controlsLayout = "left",
+  buttonSize = "medium",
 }) => {
+  engine.joystickPosition = controlsLayout;
+  engine.buttonSize = buttonSize;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const inputMgrRef = useRef<InputManager | null>(null);
   const [isTouch, setIsTouch] = useState(false);
@@ -157,7 +161,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         engine={engine}
         visible={isTouch && isPlaying}
         layout={controlsLayout}
+        buttonSize={buttonSize}
       />
+      {isPlaying && (
+        <button
+          onClick={() => engine.togglePause()}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-12 h-12 rounded-2xl bg-slate-900/85 border border-slate-600/70 hover:bg-slate-800 active:scale-90 active:bg-slate-700 text-slate-100 flex items-center justify-center font-black text-lg shadow-xl shadow-black/60 pointer-events-auto z-30 transition-transform select-none"
+          aria-label="Duraklat"
+        >
+          <span className="leading-none">Ⅱ</span>
+        </button>
+      )}
     </>
   );
 };

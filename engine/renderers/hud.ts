@@ -1,4 +1,4 @@
-import { VW, VH } from "../constants";
+import { VW } from "../constants";
 import { clamp, roundRect, drawText } from "../utils";
 import type { RoutePhaseInfo } from "../types";
 
@@ -6,44 +6,52 @@ export function drawSpeedometer(
   ctx: CanvasRenderingContext2D,
   speed: number,
   isBraking: boolean,
-  isThrottling: boolean
+  isThrottling: boolean,
+  cx = 225,
+  cy = 750,
+  r = 38
 ): void {
-  const cx = 225, cy = 750, r = 38, maxKmh = 160;
+  const maxKmh = 160;
   const ratio = clamp(speed / maxKmh, 0, 1);
   ctx.save();
-  ctx.fillStyle = "rgba(7,10,14,.85)";
+
+  // Yüksek kontrastlı arka plan ve dış parlama
+  ctx.fillStyle = "rgba(4,7,11,.92)";
   ctx.beginPath();
-  ctx.arc(cx, cy, r + 6, 0, Math.PI * 2);
+  ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,.12)";
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = "rgba(115,224,209,.3)";
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
   const a0 = Math.PI * 0.76;
   const a1 = Math.PI * 2.24;
   const span = a1 - a0;
 
-  ctx.strokeStyle = "rgba(255,255,255,.10)";
+  // Arka halka izi
+  ctx.strokeStyle = "rgba(255,255,255,.14)";
   ctx.lineWidth = 5;
   ctx.beginPath();
   ctx.arc(cx, cy, r, a0, a1);
   ctx.stroke();
 
+  // Renkli hız yayı
   const grad = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
-  grad.addColorStop(0, "#75dca4");
-  grad.addColorStop(0.62, "#f1c75f");
-  grad.addColorStop(1, "#ff7166");
+  grad.addColorStop(0, "#4ade80");
+  grad.addColorStop(0.6, "#facc15");
+  grad.addColorStop(1, "#f87171");
   ctx.strokeStyle = grad;
   ctx.lineWidth = 5;
   ctx.beginPath();
   ctx.arc(cx, cy, r, a0, a0 + span * ratio);
   ctx.stroke();
 
+  // Kadran çizgileri
   for (let i = 0; i <= 8; i++) {
     const a = a0 + span * (i / 8);
-    const inner = r - 8;
-    const outer = r - 3;
-    ctx.strokeStyle = i <= Math.round(ratio * 8) ? "rgba(244,246,242,.85)" : "rgba(255,255,255,.22)";
+    const inner = r - 7;
+    const outer = r - 2;
+    ctx.strokeStyle = i <= Math.round(ratio * 8) ? "#ffffff" : "rgba(255,255,255,.25)";
     ctx.lineWidth = i % 2 === 0 ? 1.6 : 1;
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner);
@@ -51,21 +59,24 @@ export function drawSpeedometer(
     ctx.stroke();
   }
 
+  // İbre
   const needleA = a0 + span * ratio;
-  ctx.strokeStyle = "#f4f1e8";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.2;
   ctx.beginPath();
   ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + Math.cos(needleA) * (r - 11), cy + Math.sin(needleA) * (r - 11));
+  ctx.lineTo(cx + Math.cos(needleA) * (r - 9), cy + Math.sin(needleA) * (r - 9));
   ctx.stroke();
 
-  ctx.fillStyle = "#f4f1e8";
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
   ctx.fill();
 
-  drawText(ctx, String(speed), cx, cy + 4, 15, 950, isBraking ? "#ff9a8f" : isThrottling ? "#9aefc4" : "#fff", "center");
-  drawText(ctx, "KM/H", cx, cy + 17, 5.7, 950, "#81909a", "center");
+  // Sayısal KM/H Değeri - Çok net ve yüksek kontrastlı
+  const numColor = isBraking ? "#f87171" : isThrottling ? "#4ade80" : "#ffffff";
+  drawText(ctx, String(speed), cx, cy + 5, r > 34 ? 17 : 15, 950, numColor, "center");
+  drawText(ctx, "KM/H", cx, cy + 18, 6.5, 950, "#94a3b8", "center");
   ctx.restore();
 }
 
@@ -92,14 +103,16 @@ export function drawCanvasHUD(
   lastViolation: string,
   combo: number,
   isTouch: boolean,
-  controls: { throttle: boolean; brake: boolean }
+  controls: { throttle: boolean; brake: boolean },
+  joystickPosition: "left" | "right" = "left",
+  buttonSize: "small" | "medium" | "large" = "medium"
 ): void {
-  const panelBg = "rgba(7,11,16,.75)";
-  const panelBorder = "rgba(255,255,255,.12)";
+  const panelBg = "rgba(7,11,16,.80)";
+  const panelBorder = "rgba(255,255,255,.14)";
 
-  // Üst panel gölgesi / karartması (yolla kusursuz bütünleşme için üst gradyan)
+  // Üst panel gölgesi
   const topFade = ctx.createLinearGradient(0, 0, 0, 160);
-  topFade.addColorStop(0, "rgba(2,4,7,.65)");
+  topFade.addColorStop(0, "rgba(2,4,7,.70)");
   topFade.addColorStop(0.7, "rgba(2,4,7,.25)");
   topFade.addColorStop(1, "rgba(2,4,7,0)");
   ctx.fillStyle = topFade;
@@ -107,7 +120,7 @@ export function drawCanvasHUD(
 
   // 1. Sol üst: Rota ve görev
   ctx.fillStyle = panelBg;
-  roundRect(ctx, 14, 44, 220, 70, 18);
+  roundRect(ctx, 14, 44, 218, 70, 18);
   ctx.fill();
   ctx.strokeStyle = panelBorder;
   ctx.stroke();
@@ -115,104 +128,145 @@ export function drawCanvasHUD(
   drawText(ctx, phase.name, 28, 64, 8, 950, "#73e0d1");
   drawText(ctx, phase.sub, 28, 85, 14, 950, "#f6f7f6");
   drawText(ctx, missionTitle, 28, 103, 8.2, 700, "#82919c");
-  drawText(ctx, missionProgress, 218, 103, 8.5, 900, "#ccd5db", "right");
+  drawText(ctx, missionProgress, 216, 103, 8.5, 900, "#ccd5db", "right");
 
   // 2. Sağ üst: Skor ve teslimat
   ctx.fillStyle = panelBg;
-  roundRect(ctx, 244, 44, 192, 70, 18);
+  roundRect(ctx, 238, 44, 198, 70, 18);
   ctx.fill();
   ctx.strokeStyle = panelBorder;
   ctx.stroke();
 
-  drawText(ctx, "TESLİMAT", 260, 64, 7.2, 900, "#7d8b96");
-  drawText(ctx, String(deliveries).padStart(2, "0"), 260, 91, 23, 950, "#f2c46d");
+  drawText(ctx, "TESLİMAT", 254, 64, 7.2, 900, "#7d8b96");
+  drawText(ctx, String(deliveries).padStart(2, "0"), 254, 91, 23, 950, "#f2c46d");
   drawText(ctx, "PUAN", 420, 64, 7.2, 900, "#7d8b96", "right");
   drawText(ctx, Math.floor(score).toLocaleString("tr-TR"), 420, 89, 13, 900, "#f3f5f5", "right");
   drawText(ctx, `★ ${unlockedCount}/${totalAchievements}`, 420, 106, 6.7, 900, "#dcbf74", "right");
 
-  // 3. Saat pill ve Duraklat butonu
-  ctx.fillStyle = "rgba(7,10,14,.72)";
-  roundRect(ctx, 320, 122, 86, 25, 12.5);
+  // 3. Sağ üst saat pill'i
+  ctx.fillStyle = "rgba(7,10,14,.75)";
+  roundRect(ctx, 310, 122, 126, 25, 12.5);
   ctx.fill();
   ctx.strokeStyle = panelBorder;
   ctx.stroke();
-  drawText(ctx, `${clockText} · ${phaseText}`, 363, 138, 8, 900, "#d9e5eb", "center");
+  drawText(ctx, `${clockText} · ${speed} KM/H`, 373, 138, 8.2, 950, isTouch ? "#38bdf8" : "#d9e5eb", "center");
 
-  ctx.fillStyle = "rgba(7,10,14,.76)";
-  ctx.beginPath();
-  ctx.arc(423, 134, 13, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = panelBorder;
-  ctx.stroke();
-  drawText(ctx, "Ⅱ", 423, 138, 8.5, 950, "#e8eeef", "center");
-
-  // 4. Sol alt: Sağlık
-  ctx.fillStyle = panelBg;
-  roundRect(ctx, 14, 708, 92, 66, 18);
-  ctx.fill();
-  ctx.strokeStyle = panelBorder;
-  ctx.stroke();
-  drawText(ctx, "SAĞLIK", 28, 729, 7.2, 950, "#788994");
-  drawText(ctx, `${Math.round(health)}%`, 28, 754, 18, 950, health < 35 ? "#ff786d" : "#88e2ae");
-  ctx.fillStyle = "rgba(255,255,255,.08)";
-  roundRect(ctx, 28, 762, 62, 4, 2);
-  ctx.fill();
-  ctx.fillStyle = health < 35 ? "#ff6b61" : "#67d89a";
-  roundRect(ctx, 28, 762, (62 * health) / 100, 4, 2);
-  ctx.fill();
-
-  // 5. Orta alt: Hız göstergesi
-  drawSpeedometer(ctx, speed, controls.brake, controls.throttle);
-
-  // 6. Sağ alt: NOS göstergesi
-  ctx.fillStyle = "rgba(7,10,14,.82)";
-  ctx.beginPath();
-  ctx.arc(397, 740, 38, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = panelBorder;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  ctx.strokeStyle = nos >= 30 ? "#67d8ff" : "#5e6971";
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.arc(397, 740, 29, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * nos) / 100);
-  ctx.stroke();
-  drawText(ctx, boosting ? "BOOST" : "NOS", 397, 738, 7.5, 950, boosting ? "#9ce8ff" : "#8295a2", "center");
-  drawText(ctx, `${Math.round(nos)}%`, 397, 754, 10.5, 950, "#fff", "center");
-
-  // 7. Polis veya İhlal Paneli
-  if (wanted >= 20 || isChasing) {
-    ctx.fillStyle = "rgba(7,9,12,.80)";
-    roundRect(ctx, 117, 670, 216, 48, 16);
+  // 4. Sağlık Göstergesi: Mobilde yukarıda, masaüstünde sol altta
+  if (isTouch) {
+    ctx.fillStyle = "rgba(7,10,14,.80)";
+    roundRect(ctx, 14, 122, 98, 25, 12.5);
     ctx.fill();
     ctx.strokeStyle = panelBorder;
     ctx.stroke();
-    drawText(ctx, "POLİS TAKİBİ", 132, 690, 7.1, 950, "#ff7b70");
-    const cleanLeft = Math.max(0, 10 - Math.floor(cleanFrames / 60));
-    drawText(ctx, cleanLeft > 0 ? `${cleanLeft}s temiz` : "İZ KAYBOLUYOR", 318, 690, 7.6, 900, "#ffd3a1", "right");
-    ctx.fillStyle = "rgba(255,255,255,.09)";
-    roundRect(ctx, 132, 699, 186, 6, 3);
-    ctx.fill();
-    ctx.fillStyle = arrest > 65 ? "#ff665b" : "#ffc85b";
-    roundRect(ctx, 132, 699, (186 * arrest) / 100, 6, 3);
-    ctx.fill();
-    drawText(ctx, `yakalanma ${Math.round(arrest)}%`, 318, 713, 6.8, 800, "#9eabb4", "right");
+    drawText(ctx, "♥ SAĞLIK", 24, 138, 7.2, 950, "#94a3b8");
+    drawText(ctx, `${Math.round(health)}%`, 102, 138, 9.5, 950, health < 35 ? "#f87171" : "#4ade80", "right");
   } else {
-    ctx.fillStyle = "rgba(7,9,12,.60)";
-    roundRect(ctx, 130, 680, 190, 31, 14);
+    ctx.fillStyle = panelBg;
+    roundRect(ctx, 14, 708, 92, 66, 18);
     ctx.fill();
     ctx.strokeStyle = panelBorder;
     ctx.stroke();
-    drawText(ctx, violations ? `Son ihlal: ${lastViolation}` : "Temiz sürüş", 225, 700, 7.7, 850, violations ? "#aeb8bf" : "#84deb0", "center");
+    drawText(ctx, "SAĞLIK", 28, 729, 7.2, 950, "#788994");
+    drawText(ctx, `${Math.round(health)}%`, 28, 754, 18, 950, health < 35 ? "#ff786d" : "#88e2ae");
+    ctx.fillStyle = "rgba(255,255,255,.08)";
+    roundRect(ctx, 28, 762, 62, 4, 2);
+    ctx.fill();
+    ctx.fillStyle = health < 35 ? "#ff6b61" : "#67d89a";
+    roundRect(ctx, 28, 762, (62 * health) / 100, 4, 2);
+    ctx.fill();
+  }
+
+  // 5. Hız Göstergesi: Mobilde buton boyutuna göre dinamik konumlanır
+  const speedCy = !isTouch
+    ? 750
+    : buttonSize === "large"
+    ? 600
+    : buttonSize === "medium"
+    ? 630
+    : 660;
+  const speedR = !isTouch ? 38 : (buttonSize === "large" ? 31 : 34);
+
+  drawSpeedometer(
+    ctx,
+    speed,
+    controls.brake,
+    controls.throttle,
+    225,
+    speedCy,
+    speedR
+  );
+
+  // 6. Dairesel NOS Göstergesi: Masaüstünde sağ altta; mobilde TouchControls içinde tıklanabilir interaktif buton
+  if (!isTouch) {
+    const nosCx = 397;
+    const nosCy = 740;
+    const nosR = 38;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(7,10,14,.88)";
+    ctx.beginPath();
+    ctx.arc(nosCx, nosCy, nosR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = nos >= 30 ? "rgba(56,189,248,.6)" : panelBorder;
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+
+    ctx.strokeStyle = nos >= 30 ? (boosting ? "#38bdf8" : "#0284c7") : "#475569";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(nosCx, nosCy, nosR - 6, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * nos) / 100);
+    ctx.stroke();
+
+    drawText(ctx, boosting ? "BOOST" : "⚡ NOS", nosCx, nosCy - 1, 8, 950, boosting ? "#7dd3fc" : "#e0f2fe", "center");
+    drawText(ctx, `${Math.round(nos)}%`, nosCx, nosCy + 11, 11, 950, "#ffffff", "center");
+    ctx.restore();
+  }
+
+  // 7. Polis veya İhlal / Temiz Sürüş Paneli: Mobilde üstte
+  const uyariY = isTouch ? 122 : (wanted >= 20 || isChasing ? 670 : 680);
+  const uyariX = isTouch ? 118 : (wanted >= 20 || isChasing ? 117 : 130);
+  const uyariW = isTouch ? 186 : (wanted >= 20 || isChasing ? 216 : 190);
+  const uyariH = isTouch ? 25 : (wanted >= 20 || isChasing ? 48 : 31);
+  const uyariR = isTouch ? 12.5 : (wanted >= 20 || isChasing ? 16 : 14);
+
+  if (wanted >= 20 || isChasing) {
+    ctx.fillStyle = "rgba(7,9,12,.85)";
+    roundRect(ctx, uyariX, uyariY, uyariW, uyariH, uyariR);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(248,113,113,.4)";
+    ctx.stroke();
+    if (isTouch) {
+      drawText(ctx, "POLİS TAKİBİ", uyariX + 10, uyariY + 16, 7.2, 950, "#f87171");
+      drawText(ctx, `yakalanma %${Math.round(arrest)}`, uyariX + uyariW - 10, uyariY + 16, 7.2, 900, "#facc15", "right");
+    } else {
+      drawText(ctx, "POLİS TAKİBİ", 132, 690, 7.1, 950, "#ff7b70");
+      const cleanLeft = Math.max(0, 10 - Math.floor(cleanFrames / 60));
+      drawText(ctx, cleanLeft > 0 ? `${cleanLeft}s temiz` : "İZ KAYBOLUYOR", 318, 690, 7.6, 900, "#ffd3a1", "right");
+      ctx.fillStyle = "rgba(255,255,255,.09)";
+      roundRect(ctx, 132, 699, 186, 6, 3);
+      ctx.fill();
+      ctx.fillStyle = arrest > 65 ? "#ff665b" : "#ffc85b";
+      roundRect(ctx, 132, 699, (186 * arrest) / 100, 6, 3);
+      ctx.fill();
+      drawText(ctx, `yakalanma ${Math.round(arrest)}%`, 318, 713, 6.8, 800, "#9eabb4", "right");
+    }
+  } else {
+    ctx.fillStyle = "rgba(7,9,12,.70)";
+    roundRect(ctx, uyariX, uyariY, uyariW, uyariH, uyariR);
+    ctx.fill();
+    ctx.strokeStyle = panelBorder;
+    ctx.stroke();
+    const textY = isTouch ? uyariY + 16 : 700;
+    drawText(ctx, violations ? `Son ihlal: ${lastViolation}` : "Temiz sürüş", uyariX + uyariW / 2, textY, 7.5, 850, violations ? "#94a3b8" : "#4ade80", "center");
   }
 
   // 8. Combo
   if (combo > 1) {
-    ctx.fillStyle = "rgba(42,31,9,.75)";
-    roundRect(ctx, 18, 126, 84, 26, 13);
+    ctx.fillStyle = "rgba(42,31,9,.80)";
+    roundRect(ctx, 14, 153, 84, 24, 12);
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,200,80,.3)";
+    ctx.strokeStyle = "rgba(255,200,80,.4)";
     ctx.stroke();
-    drawText(ctx, `x${combo} SERİ`, 60, 143, 8, 900, "#ffe09b", "center");
+    drawText(ctx, `x${combo} SERİ`, 56, 169, 8, 900, "#fde047", "center");
   }
 }

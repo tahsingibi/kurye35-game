@@ -59,8 +59,37 @@ export class GameEngine {
 
   gameMinutes = 17 * 60 + 20;
   lastTimePhase = "AKŞAM";
-  isTouchDevice = false;
+  private _buttonSize: "small" | "medium" | "large" = "medium";
+  get buttonSize(): "small" | "medium" | "large" {
+    return this._buttonSize;
+  }
+  set buttonSize(val: "small" | "medium" | "large") {
+    this._buttonSize = val;
+    this.updatePlayerY();
+  }
+
+  private _isTouchDevice = false;
+  get isTouchDevice(): boolean {
+    return this._isTouchDevice;
+  }
+  set isTouchDevice(val: boolean) {
+    this._isTouchDevice = val;
+    this.updatePlayerY();
+  }
+
+  updatePlayerY(): void {
+    if (!this._isTouchDevice) {
+      this.player.y = 633;
+    } else if (this._buttonSize === "large") {
+      this.player.y = 530;
+    } else if (this._buttonSize === "medium") {
+      this.player.y = 550;
+    } else {
+      this.player.y = 570;
+    }
+  }
   controls: ControlsState = { throttle: false, brake: false };
+  joystickPosition: "left" | "right" = "left";
 
   highScore = 0;
   bestDeliveries = 0;
@@ -333,6 +362,7 @@ export class GameEngine {
     this.police = [];
     this.particles = [];
     this.floaters = [];
+    this.updatePlayerY();
     this.player.lane = 1;
     this.player.x = laneCenter(1, this.player.y, 0, 0) - this.player.w / 2;
     this.player.invuln = 0;

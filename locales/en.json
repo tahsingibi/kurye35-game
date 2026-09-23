@@ -70,7 +70,16 @@
     "layout_left": "Left: Steer · Right: Pedals",
     "layout_right": "Left: Pedals · Right: Steer",
     "steer_left": "Steer Left",
-    "steer_right": "Steer Right"
+    "steer_right": "Steer Right",
+    "button_size": "Button Size",
+    "size_small": "Small",
+    "size_medium": "Medium",
+    "size_large": "Large",
+    "sound_effects": "Sound Effects",
+    "sound_on": "On",
+    "sound_off": "Off",
+    "open_settings": "Settings",
+    "close": "Close"
   },
   "game_over": {
     "busted_badge": "POLICE REPORT",

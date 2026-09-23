@@ -1,7 +1,22 @@
+import { getSoundEnabled } from "@/utils/settings";
+
 let audioCtx: AudioContext | null = null;
+let soundMuted = false;
+
+if (typeof window !== "undefined") {
+  soundMuted = !getSoundEnabled();
+}
+
+export function setSoundMuted(muted: boolean): void {
+  soundMuted = muted;
+}
+
+export function isSoundMuted(): boolean {
+  return soundMuted;
+}
 
 function ensureAudio(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || soundMuted) return;
   const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   if (!audioCtx && AudioContextClass) {
     audioCtx = new AudioContextClass();
@@ -18,6 +33,7 @@ export function playTone(
   type: OscillatorType = "sine",
   volume = 0.05
 ): void {
+  if (soundMuted) return;
   try {
     ensureAudio();
     if (!audioCtx) return;
@@ -46,6 +62,7 @@ export function playTone(
 export type SoundType = "move" | "pickup" | "hit" | "nos" | "siren" | "success";
 
 export function playSound(type: SoundType): void {
+  if (soundMuted) return;
   if (type === "move") {
     playTone(190, 120, 0.07, "sine", 0.035);
   } else if (type === "pickup") {
