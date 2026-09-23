@@ -48,19 +48,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const handleResize = () => {
       const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-      const ratio = VW / VH;
-      const ww = window.innerWidth;
-      const wh = window.innerHeight;
-      let w: number;
-      let h: number;
-
-      if (ww / wh < ratio) {
-        w = ww;
-        h = w / ratio;
-      } else {
-        h = Math.min(wh, 920);
-        w = h * ratio;
-      }
+      const scale = Math.min(window.innerWidth / VW, window.innerHeight / VH);
+      const w = VW * scale;
+      const h = VH * scale;
 
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
@@ -116,8 +106,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
       const currentWidth = parseFloat(canvas.style.width) || VW;
-      const viewScale = currentWidth / VW;
-      const s = viewScale * dpr;
+      const s = (currentWidth / VW) * dpr;
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -155,7 +144,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     <>
       <canvas
         ref={canvasRef}
-        className="block shadow-[0_34px_120px_rgba(0,0,0,0.85)] rounded-lg overflow-hidden"
+        className="absolute inset-0 block w-full h-full"
       />
       <TouchControls
         engine={engine}

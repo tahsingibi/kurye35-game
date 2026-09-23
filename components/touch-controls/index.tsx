@@ -206,7 +206,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   );
 
   return (
-    <div className="fixed bottom-4 md:bottom-7 left-0 right-0 px-4 sm:px-6 pointer-events-none z-30 flex items-end justify-between max-w-lg mx-auto select-none">
+    <div className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-0 right-0 px-3 sm:px-6 pointer-events-none z-30 flex items-end justify-between max-w-[42rem] mx-auto select-none">
       {isLeftLayout ? (
         <>
           {SteerGroup}

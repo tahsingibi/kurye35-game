@@ -176,19 +176,17 @@ export function drawCanvasHUD(
     ctx.fill();
   }
 
-  // 5. Hız Göstergesi:
-  // UX Game Design: Mobilde ekranın alt merkezinde (cy: 746, r: 29) konumlandırılarak
-  // oyuncu aracının (y: 520..560) kesinlikle kapanmaması ve iki kontrol kümesi arasında
-  // şık bir spor kadran podu oluşturması sağlandı.
-  const speedCy = isTouch ? 746 : 750;
-  const speedR = isTouch ? 29 : 38;
+  // 5. Hız Göstergesi: Mobilde kontrol bölgesinden tamamen ayrılmış sağ üst kokpit podu.
+  const speedCx = isTouch ? 398 : 225;
+  const speedCy = isTouch ? 195 : 750;
+  const speedR = isTouch ? 27 : 38;
 
   drawSpeedometer(
     ctx,
     speed,
     controls.brake,
     controls.throttle,
-    225,
+    speedCx,
     speedCy,
     speedR
   );
@@ -219,12 +217,12 @@ export function drawCanvasHUD(
     ctx.restore();
   }
 
-  // 7. Polis veya İhlal / Temiz Sürüş Paneli: Mobilde üstte
-  const uyariY = isTouch ? 122 : (wanted >= 20 || isChasing ? 670 : 680);
-  const uyariX = isTouch ? 118 : (wanted >= 20 || isChasing ? 117 : 130);
-  const uyariW = isTouch ? 186 : (wanted >= 20 || isChasing ? 216 : 190);
-  const uyariH = isTouch ? 25 : (wanted >= 20 || isChasing ? 48 : 31);
-  const uyariR = isTouch ? 12.5 : (wanted >= 20 || isChasing ? 16 : 14);
+  // 7. Sürüş durumu: Her platformda oyun alanının üst bilgi katmanında kalır.
+  const uyariY = 154;
+  const uyariX = 14;
+  const uyariW = isTouch ? 348 : 422;
+  const uyariH = wanted >= 20 || isChasing ? 38 : 28;
+  const uyariR = 14;
 
   if (wanted >= 20 || isChasing) {
     ctx.fillStyle = "rgba(7,9,12,.85)";
@@ -232,38 +230,31 @@ export function drawCanvasHUD(
     ctx.fill();
     ctx.strokeStyle = "rgba(248,113,113,.4)";
     ctx.stroke();
-    if (isTouch) {
-      drawText(ctx, "POLİS TAKİBİ", uyariX + 10, uyariY + 16, 7.2, 950, "#f87171");
-      drawText(ctx, `yakalanma %${Math.round(arrest)}`, uyariX + uyariW - 10, uyariY + 16, 7.2, 900, "#facc15", "right");
-    } else {
-      drawText(ctx, "POLİS TAKİBİ", 132, 690, 7.1, 950, "#ff7b70");
-      const cleanLeft = Math.max(0, 10 - Math.floor(cleanFrames / 60));
-      drawText(ctx, cleanLeft > 0 ? `${cleanLeft}s temiz` : "İZ KAYBOLUYOR", 318, 690, 7.6, 900, "#ffd3a1", "right");
-      ctx.fillStyle = "rgba(255,255,255,.09)";
-      roundRect(ctx, 132, 699, 186, 6, 3);
-      ctx.fill();
-      ctx.fillStyle = arrest > 65 ? "#ff665b" : "#ffc85b";
-      roundRect(ctx, 132, 699, (186 * arrest) / 100, 6, 3);
-      ctx.fill();
-      drawText(ctx, `yakalanma ${Math.round(arrest)}%`, 318, 713, 6.8, 800, "#9eabb4", "right");
-    }
+    const cleanLeft = Math.max(0, 10 - Math.floor(cleanFrames / 60));
+    drawText(ctx, "● POLİS TAKİBİ", uyariX + 12, uyariY + 15, 7.2, 950, "#f87171");
+    drawText(ctx, cleanLeft > 0 ? `${cleanLeft}s temiz sür` : "İZ KAYBOLUYOR", uyariX + uyariW - 12, uyariY + 15, 7.2, 900, "#ffd3a1", "right");
+    ctx.fillStyle = "rgba(255,255,255,.09)";
+    roundRect(ctx, uyariX + 12, uyariY + 23, uyariW - 24, 5, 2.5);
+    ctx.fill();
+    ctx.fillStyle = arrest > 65 ? "#ff665b" : "#ffc85b";
+    roundRect(ctx, uyariX + 12, uyariY + 23, ((uyariW - 24) * arrest) / 100, 5, 2.5);
+    ctx.fill();
   } else {
     ctx.fillStyle = "rgba(7,9,12,.70)";
     roundRect(ctx, uyariX, uyariY, uyariW, uyariH, uyariR);
     ctx.fill();
     ctx.strokeStyle = panelBorder;
     ctx.stroke();
-    const textY = isTouch ? uyariY + 16 : 700;
-    drawText(ctx, violations ? `Son ihlal: ${lastViolation}` : "Temiz sürüş", uyariX + uyariW / 2, textY, 7.5, 850, violations ? "#94a3b8" : "#4ade80", "center");
+    drawText(ctx, violations ? `SON İHLAL · ${lastViolation}` : "✓ TEMİZ SÜRÜŞ · RİTMİ KORU", uyariX + 12, uyariY + 18, 7.5, 900, violations ? "#cbd5e1" : "#4ade80");
   }
 
   // 8. Combo
   if (combo > 1) {
     ctx.fillStyle = "rgba(42,31,9,.80)";
-    roundRect(ctx, 14, 153, 84, 24, 12);
+    roundRect(ctx, 14, wanted >= 20 || isChasing ? 198 : 188, 84, 24, 12);
     ctx.fill();
     ctx.strokeStyle = "rgba(255,200,80,.4)";
     ctx.stroke();
-    drawText(ctx, `x${combo} SERİ`, 56, 169, 8, 900, "#fde047", "center");
+    drawText(ctx, `x${combo} SERİ`, 56, (wanted >= 20 || isChasing ? 198 : 188) + 16, 8, 900, "#fde047", "center");
   }
 }

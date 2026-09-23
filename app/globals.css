@@ -20,3 +20,9 @@ body {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* Oyun dünyasının 450×800 tasarım oranını her ekranda bozulmadan korur. */
+.game-viewport {
+  width: min(100vw, 56.25dvh);
+  height: min(100dvh, 177.777778vw);
+}

@@ -1,17 +1,31 @@
-import { getSoundEnabled, VehicleType } from "@/utils/settings";
+import { getSoundSettings, SoundSettings, VehicleType } from "@/utils/settings";
 
 let audioCtx: AudioContext | null = null;
 let soundMuted = false;
+let channelSettings: SoundSettings = {
+  master: true,
+  vehicle: true,
+  ambience: true,
+  effects: true,
+};
 
 if (typeof window !== "undefined") {
-  soundMuted = !getSoundEnabled();
+  channelSettings = getSoundSettings();
+  soundMuted = !channelSettings.master;
 }
 
 export function setSoundMuted(muted: boolean): void {
   soundMuted = muted;
+  channelSettings.master = !muted;
   if (muted) {
     stopEngineSound();
   }
+}
+
+export function setAudioSettings(settings: SoundSettings): void {
+  channelSettings = { ...settings };
+  soundMuted = !settings.master;
+  if (soundMuted || !settings.vehicle) stopEngineSound();
 }
 
 export function isSoundMuted(): boolean {
@@ -66,7 +80,7 @@ export function playTone(
 export type SoundType = "move" | "pickup" | "hit" | "nos" | "siren" | "success";
 
 export function playSound(type: SoundType): void {
-  if (soundMuted) return;
+  if (soundMuted || !channelSettings.effects) return;
   if (type === "move") {
     playTone(190, 120, 0.07, "sine", 0.035);
   } else if (type === "pickup") {
@@ -121,7 +135,7 @@ function getNoiseBuffer(ctx: AudioContext): AudioBuffer {
 }
 
 export function startEngineSound(vehicleType: VehicleType): void {
-  if (soundMuted || typeof window === "undefined") return;
+  if (soundMuted || !channelSettings.vehicle || typeof window === "undefined") return;
   try {
     const ctx = ensureAudio();
     if (!ctx) return;
@@ -248,8 +262,8 @@ export function updateEngineSound(
   rain = 0,
   nightVal = 0
 ): void {
-  if (soundMuted || !activeAudio) {
-    if (!soundMuted && !activeAudio) {
+  if (soundMuted || !channelSettings.vehicle || !activeAudio) {
+    if (!soundMuted && channelSettings.vehicle && !activeAudio) {
       startEngineSound(vehicleType);
     }
     return;
@@ -288,7 +302,7 @@ export function updateEngineSound(
         ? 0.011 + speedRatio * 0.005
         : 0.005 + speedRatio * 0.003;
       if (boosting) targetEngineVol += 0.006;
-      activeAudio.engineGain.gain.setTargetAtTime(targetEngineVol, now, 0.16);
+      activeAudio.engineGain.gain.setTargetAtTime(channelSettings.vehicle ? targetEngineVol : 0, now, 0.16);
     } else {
       // Motosiklet: Kulak delen testere dişi yerine tok, ritmik 2 silindir kurye motoru
       let baseFreq = 54 + speedRatio * 42;
@@ -307,22 +321,22 @@ export function updateEngineSound(
         ? 0.010 + speedRatio * 0.005
         : 0.005 + speedRatio * 0.002;
       if (boosting) targetEngineVol += 0.005;
-      activeAudio.engineGain.gain.setTargetAtTime(targetEngineVol, now, 0.14);
+      activeAudio.engineGain.gain.setTargetAtTime(channelSettings.vehicle ? targetEngineVol : 0, now, 0.14);
     }
 
     // 2. Rüzgar & Asfalt Sürtünme Sesi (Hızlandıkça organik yol akışı)
     const windTargetGain = 0.004 + speedRatio * 0.020 + (boosting ? 0.012 : 0);
     const windTargetFreq = 280 + speedRatio * 480;
-    activeAudio.windGain.gain.setTargetAtTime(windTargetGain, now, 0.18);
+    activeAudio.windGain.gain.setTargetAtTime(channelSettings.ambience ? windTargetGain : 0, now, 0.18);
     activeAudio.windFilter.frequency.setTargetAtTime(windTargetFreq, now, 0.18);
 
     // 3. Yağmur & Islak Asfalt Ambiyansı
     const rainTargetVol = rain > 0 ? 0.008 + rain * 0.022 : 0;
-    activeAudio.rainGain.gain.setTargetAtTime(rainTargetVol, now, 0.3);
+    activeAudio.rainGain.gain.setTargetAtTime(channelSettings.ambience ? rainTargetVol : 0, now, 0.3);
 
     // 4. Gece Sakinliği Ambiyansı
     const nightTargetVol = nightVal > 0.3 ? (nightVal - 0.3) * 0.010 : 0;
-    activeAudio.nightGain.gain.setTargetAtTime(nightTargetVol, now, 0.4);
+    activeAudio.nightGain.gain.setTargetAtTime(channelSettings.ambience ? nightTargetVol : 0, now, 0.4);
   } catch {}
 }
 
@@ -365,7 +379,7 @@ export function stopEngineSound(): void {
 }
 
 export function playVehicleRev(vehicleType: VehicleType): void {
-  if (soundMuted) return;
+  if (soundMuted || !channelSettings.vehicle) return;
   try {
     const ctx = ensureAudio();
     if (!ctx) return;

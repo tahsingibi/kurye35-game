@@ -17,12 +17,15 @@
   - Gaza basma, süzülme (coasting), frenleme ve NOS durumlarına göre akıcı devir tepkileri.
   - Hızlandıkça yükselen doğal **asfalt & rüzgar uğultusu**, yağmurlu havalarda **ıslak zemin şıpırtısı** ve gece vardiyasında **derin gece esintisi**.
   - Son viteste kulak tırmalamayan, tok ve kadife gibi kalibre edilmiş egzoz tınısı.
+  - Ayarlardaki ses mikseri üzerinden ana ses, araç, ortam ve oyun efektlerini birbirinden bağımsız açıp kapatma.
 - **Canvas 2D Motoru**: 60 FPS akıcı piksel fiziği, dinamik araç trafik simülasyonu ve parçacık efektleri.
 - **İzmir Rotaları**: Konak Saat Kulesi, Alsancak Liman Hattı, Kordon boyu, Altınyol viyadükleri ve Karşıyaka sahil şeridi.
 - **Günün Evreleri & Hava Durumu**: Şafak, gündüz, akşam kızıllığı ve neon gece atmosferi; yağmurlu zeminlerde değişen yol tutuşu.
 - **Vardiya Mekanikleri**: Seri teslimat comboları, aşırı hız ihlalleri, aranma seviyesi ve peşine düşen polis takibi.
-- **Ergonomik Mobil Kokpit HUD**:
-  - Oyuncu aracının arkasını/gövdesini asla kapatmayan alt merkez spor ibreli kadran tasarımı.
+- **Responsive Tam Ekran Kokpit HUD**:
+  - Webde kullanılabilir yüksekliği tamamen kullanan, 9:16 oyun oranını bozmadan mobilde responsive kalan oyun yüzeyi.
+  - Temiz sürüş, son ihlal ve polis takibini oyun alanının üst bilgi katmanında sürekli görünür tutan durum şeridi.
+  - Mobil kontrol butonlarından tamamen ayrılmış sağ üst spor ibreli hız kadranı.
   - Başparmak ergonomisine uygun D-Pad yön butonları, Gaz, Fren ve interaktif NOS pedalları (Solak/Sağlak el desteğiyle).
 - **Yerelleştirme (i18n)**: Çoklu dil desteği.
 - **PWA & Çevrimdışı Oynanabilirlik**: Service worker desteğiyle mobil cihazlara yüklenebilir ve internetsiz oynanabilir.
@@ -50,7 +53,7 @@ Ekranın en altına yerleşen, başparmak ergonomisine uygun neon arcade kontrol
 - **`[ GAZ ▲ ]` Pedalı**: Basılı tutulduğunda araç hızlanır; bırakıldığında doğal akış hızına döner.
 - **`[ FREN ▼ ]` Pedalı**: Basılı tutulduğunda fren yapar; bırakıldığında normal hıza döner.
 - **`[ NOS ⚡ ]` Butonu**: Dokunulduğunda nitro ateşini devreye sokar.
-- **Alt Merkez İbreli KM Kadranı**: Kontrol butonlarının arasındaki ferah alt merkez koridorunda aracın görüşünü kapatmadan hız ve devri canlı yansıtır.
+- **Sağ Üst İbreli KM Kadranı**: Kontrol butonlarıyla çakışmadan hız ve devri canlı yansıtır.
 - **Solak / Sağlak Düzen**: Ayarlar ekranından yön butonları sol veya sağ ele göre tek dokunuşla ayarlanabilir.
 
 ---

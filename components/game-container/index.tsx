@@ -12,14 +12,15 @@ import { ShareModal } from "@/components/share-modal";
 import { SettingsModal } from "@/components/settings-modal";
 import { VehicleSelectModal } from "@/components/vehicle-select-modal";
 import { PwaInstaller } from "@/components/pwa-installer";
-import { setSoundMuted } from "@/engine/audio";
+import { setAudioSettings } from "@/engine/audio";
 import {
   getJoystickPosition,
   setJoystickPosition as saveJoystickPosition,
   getButtonSize,
   setButtonSize as saveButtonSize,
-  getSoundEnabled,
-  setSoundEnabled as saveSoundEnabled,
+  getSoundSettings,
+  setSoundSettings as saveSoundSettings,
+  SoundSettings,
   getSelectedVehicle,
   setSelectedVehicle as saveSelectedVehicle,
   JoystickPosition,
@@ -37,7 +38,7 @@ export const GameContainer: React.FC = () => {
   const [selectedVehicle, setSelectedVehicleState] = useState<VehicleType>(getSelectedVehicle);
   const [controlsLayout, setControlsLayout] = useState<JoystickPosition>(getJoystickPosition);
   const [buttonSize, setButtonSize] = useState<ButtonSize>(getButtonSize);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(getSoundEnabled);
+  const [soundSettings, setSoundSettings] = useState<SoundSettings>(getSoundSettings);
   const [, setTick] = useState(0);
 
   engine.onStateChange = (nextState: GameStateEnum) => {
@@ -55,10 +56,10 @@ export const GameContainer: React.FC = () => {
     saveButtonSize(size);
   };
 
-  const handleSoundChange = (enabled: boolean) => {
-    setSoundEnabled(enabled);
-    saveSoundEnabled(enabled);
-    setSoundMuted(!enabled);
+  const handleSoundChange = (next: SoundSettings) => {
+    setSoundSettings(next);
+    saveSoundSettings(next);
+    setAudioSettings(next);
   };
 
   const handleVehicleChange = (vehicle: VehicleType) => {
@@ -102,9 +103,9 @@ export const GameContainer: React.FC = () => {
   };
 
   return (
-    <main className="relative w-screen h-[100dvh] flex items-center justify-center overflow-hidden bg-radial from-[#16212b] via-[#070a0d] to-[#020305]">
+    <main className="relative w-screen h-[100dvh] flex items-center justify-center overflow-hidden bg-[#020305]">
       {/* Oyun Alanı ve Canvas Kapsayıcısı */}
-      <div className="relative aspect-[9/16] h-full max-h-[920px] max-w-full flex items-center justify-center overflow-hidden">
+      <div className="game-viewport relative mx-auto overflow-hidden shadow-[0_0_120px_rgba(15,118,110,0.12)]">
         <GameCanvas
           engine={engine}
           isPlaying={gameState === GameStateEnum.PLAYING}
@@ -182,8 +183,8 @@ export const GameContainer: React.FC = () => {
         onChangeJoystickPosition={handleLayoutChange}
         buttonSize={buttonSize}
         onChangeButtonSize={handleButtonSizeChange}
-        soundEnabled={soundEnabled}
-        onChangeSoundEnabled={handleSoundChange}
+        soundSettings={soundSettings}
+        onChangeSoundSettings={handleSoundChange}
       />
 
       {/* Araç Seçim Modalı */}
