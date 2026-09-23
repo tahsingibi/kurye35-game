@@ -2,6 +2,7 @@
 
 import React from "react";
 import { t } from "@/utils/localization";
+import { ArrowRightIcon } from "@/components/ui/icons";
 import { STORY_PAGES } from "@/engine/constants";
 
 interface GameStoryProps {
@@ -14,52 +15,38 @@ export const GameStory: React.FC<GameStoryProps> = ({ currentPage, onAdvance }) 
   const isLastPage = currentPage >= STORY_PAGES.length - 1;
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col justify-between p-6 pointer-events-auto select-none bg-slate-950/80 backdrop-blur-md transition-all duration-300">
-      {/* Üst Rozet */}
-      <div className="pt-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-950/80 border border-teal-500/40 text-teal-300 text-[11px] font-black uppercase tracking-wider">
-          {t("story.badge")}
-        </div>
+    <div className="ui-modal-backdrop absolute inset-0 z-40 flex flex-col justify-between px-5 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))] pointer-events-auto select-none">
+      <div className="flex items-center justify-between">
+        <div className="ui-kicker">{t("story.badge")}</div>
+        <div className="flex gap-1.5">{STORY_PAGES.map((_, i) => <span key={i} className={`h-1.5 rounded-full transition-all ${i === currentPage ? "w-7 bg-teal-300" : "w-1.5 bg-white/20"}`} />)}</div>
       </div>
 
-      {/* Hikaye İçerik Kartı */}
-      <div className="my-auto space-y-4">
-        <span className="text-xs font-bold tracking-widest text-slate-400">
-          {t(current.tagKey)}
-        </span>
-        <h2 className="text-3xl font-black text-slate-100 tracking-tight">
-          {t(current.titleKey)}
-        </h2>
+      <div className="ui-rise my-auto">
+        <div className="mb-3 text-[10px] font-black tracking-[.18em] text-[#ffc766]">{t(current.tagKey)}</div>
+        <h2 className="max-w-[340px] text-[2.2rem] font-black leading-[1.02] tracking-[-.045em] text-white">{t(current.titleKey)}</h2>
 
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-700/60 shadow-xl space-y-3">
-          <div className="text-xs font-black tracking-widest text-teal-400 uppercase">
-            {t("story.center_title")}
-          </div>
+        <div className="ui-panel relative mt-6 overflow-hidden rounded-3xl p-5">
+          <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-teal-300 to-transparent" />
+          <div className="ui-kicker mb-4">{t("story.center_title")}</div>
           {current.lineKeys.map((k) => (
-            <p key={k} className="text-sm text-slate-300 leading-relaxed font-normal">
+            <p key={k} className="mb-2 text-sm leading-relaxed text-slate-300">
               {t(k)}
             </p>
           ))}
-          <div className="pt-2 text-right text-[11px] text-slate-500 font-bold">
-            {currentPage + 1} / {STORY_PAGES.length}
-          </div>
         </div>
       </div>
 
-      {/* İlerleme Butonu */}
-      <div className="pb-4 space-y-2">
+      <div className="space-y-2">
         <button
           onClick={onAdvance}
-          className="group flex items-center justify-between w-full max-w-[260px] px-6 py-4 rounded-full bg-[#f3f3ee] text-slate-900 font-black text-sm tracking-wider shadow-lg hover:bg-white active:scale-95 transition-all"
+          className="ui-primary group flex w-full items-center justify-between rounded-2xl px-5 py-4 text-sm font-black tracking-wider transition-all"
         >
           <span>{isLastPage ? t("story.btn_start") : t("story.btn_next")}</span>
-          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-slate-950 text-white group-hover:translate-x-1 transition-transform">
-            →
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#07100f] text-white transition-transform group-hover:translate-x-1">
+            <ArrowRightIcon className="h-4 w-4" />
           </span>
         </button>
-        <p className="text-[11px] text-slate-500 font-medium">
-          {t("story.hint")}
-        </p>
+        <p className="text-center text-[9px] font-bold tracking-widest text-slate-600">{t("story.hint")}</p>
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ import { GameMenu } from "@/components/game-menu";
 import { GameStory } from "@/components/game-story";
 import { GamePause } from "@/components/game-pause";
 import { GameOver } from "@/components/game-over";
-import { ShareModal } from "@/components/share-modal";
 import { SettingsModal } from "@/components/settings-modal";
 import { VehicleSelectModal } from "@/components/vehicle-select-modal";
 import { PwaInstaller } from "@/components/pwa-installer";
@@ -31,7 +30,6 @@ import {
 export const GameContainer: React.FC = () => {
   const engine = useMemo(() => new GameEngine(), []);
   const [gameState, setGameState] = useState<GameStateEnum>(GameStateEnum.MENU);
-  const [isShareOpen, setIsShareOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isVehicleSelectOpen, setIsVehicleSelectOpen] = useState(false);
   const [isStartingFlow, setIsStartingFlow] = useState(false);
@@ -98,14 +96,15 @@ export const GameContainer: React.FC = () => {
   };
 
   const handleRestart = () => {
-    setIsShareOpen(false);
     handleStartShiftFlow();
   };
 
   return (
-    <main className="relative w-screen h-[100dvh] flex items-center justify-center overflow-hidden bg-[#020305]">
+    <main className="relative w-screen h-[100dvh] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_20%,#10252a_0%,#05090c_42%,#010304_100%)]">
+      <div className="pointer-events-none absolute inset-[-5%] bg-[url('/art/izmir-shift-key-art.png')] bg-cover bg-center opacity-[.14] blur-2xl saturate-75" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(1,3,4,.35)_46%,rgba(1,3,4,.88)_100%)]" />
       {/* Oyun Alanı ve Canvas Kapsayıcısı */}
-      <div className="game-viewport relative mx-auto overflow-hidden shadow-[0_0_120px_rgba(15,118,110,0.12)]">
+      <div className="game-viewport relative mx-auto overflow-hidden md:rounded-[18px] md:border md:border-white/10 shadow-[0_0_120px_rgba(15,118,110,0.16)]">
         <GameCanvas
           engine={engine}
           isPlaying={gameState === GameStateEnum.PLAYING}
@@ -158,22 +157,9 @@ export const GameContainer: React.FC = () => {
             bestDeliveries={engine.bestDeliveries}
             unlockedCount={engine.unlockedAchievements.size}
             onRestart={handleRestart}
-            onShare={() => setIsShareOpen(true)}
           />
         )}
       </div>
-
-      {/* Paylaşım Modalı */}
-      {isShareOpen && (
-        <ShareModal
-          score={engine.score}
-          deliveries={engine.deliveries}
-          reason={engine.endReason}
-          violations={engine.violations}
-          highScore={engine.highScore}
-          onClose={() => setIsShareOpen(false)}
-        />
-      )}
 
       {/* Ayarlar Modalı */}
       <SettingsModal

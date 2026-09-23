@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Space Grotesk Variable";
+  src: url("/fonts/space-grotesk-latin-ext-wght-normal.woff2") format("woff2-variations");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Space Grotesk Variable";
+  src: url("/fonts/space-grotesk-latin-wght-normal.woff2") format("woff2-variations");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: "Rajdhani";
+  src: url("/fonts/rajdhani-latin-ext-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Rajdhani";
+  src: url("/fonts/rajdhani-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -19,6 +55,25 @@ body {
   overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;
+  color: #f4f8f7;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  font-family: "Space Grotesk Variable", "Arial", sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Rajdhani", "Arial Narrow", sans-serif;
+}
+
+:root {
+  --ui-ink: #05090c;
+  --ui-panel: rgba(7, 14, 19, 0.88);
+  --ui-panel-strong: rgba(5, 10, 14, 0.96);
+  --ui-line: rgba(202, 239, 232, 0.14);
+  --ui-line-strong: rgba(93, 230, 207, 0.42);
+  --ui-mint: #5de6cf;
+  --ui-amber: #ffc766;
+  --ui-danger: #ff6b63;
+  --ui-muted: #8da19f;
 }
 
 /* Oyun dünyasının 450×800 tasarım oranını her ekranda bozulmadan korur. */
@@ -26,3 +81,92 @@ body {
   width: min(100vw, 56.25dvh);
   height: min(100dvh, 177.777778vw);
 }
+
+.game-viewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.025), transparent 18%, transparent 78%, rgba(0,0,0,.2)),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 4px);
+  mix-blend-mode: soft-light;
+}
+
+.ui-screen {
+  background:
+    radial-gradient(circle at 78% 14%, rgba(93,230,207,.10), transparent 34%),
+    linear-gradient(180deg, rgba(2,7,10,.06) 0%, rgba(2,7,10,.42) 45%, rgba(2,7,10,.96) 100%);
+}
+
+.ui-modal-backdrop {
+  background: rgba(1, 5, 8, .78);
+  backdrop-filter: blur(14px) saturate(.8);
+}
+
+.ui-panel {
+  background: linear-gradient(145deg, rgba(12,22,28,.96), rgba(5,10,14,.96));
+  border: 1px solid var(--ui-line);
+  box-shadow: 0 26px 80px rgba(0,0,0,.58), inset 0 1px rgba(255,255,255,.035);
+}
+
+.ui-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--ui-mint);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.ui-kicker::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.ui-primary {
+  background: linear-gradient(135deg, #dffff8 0%, #5de6cf 100%);
+  color: #06100f;
+  box-shadow: 0 10px 30px rgba(48,210,184,.22), inset 0 1px rgba(255,255,255,.65);
+}
+
+.ui-primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.ui-primary:active { transform: scale(.97); }
+
+.ui-secondary {
+  background: rgba(12,22,28,.78);
+  border: 1px solid var(--ui-line);
+  color: #d7e4e2;
+}
+
+.ui-secondary:hover { border-color: var(--ui-line-strong); color: white; }
+
+.ui-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  color: #b7c9c6;
+  background: rgba(10,19,24,.82);
+  border: 1px solid var(--ui-line);
+  transition: .18s ease;
+}
+
+.ui-icon-button:hover { color: white; border-color: var(--ui-line-strong); }
+
+@keyframes ui-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ui-rise { animation: ui-rise .42s cubic-bezier(.2,.8,.2,1) both; }

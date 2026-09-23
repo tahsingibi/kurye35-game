@@ -67,7 +67,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body className="font-sans antialiased">
+      <body className="antialiased">
         {children}
         <script
           dangerouslySetInnerHTML={{

@@ -12,6 +12,7 @@ import {
   drawPursuitDangerEffect,
   drawBanner,
   drawAchievementToast,
+  drawCockpitGrade,
 } from "./renderers/effects";
 import { drawCanvasHUD } from "./renderers/hud";
 import { getPhaseInfo } from "./missions";
@@ -34,6 +35,41 @@ export function renderBackground(ctx: CanvasRenderingContext2D, engine: GameEngi
 }
 
 export function renderGameView(ctx: CanvasRenderingContext2D, engine: GameEngine): void {
+  const isChasing = engine.police.some((p) => !p.retiring);
+  const pursuitActive = isChasing || engine.wanted >= 20 || engine.arrest > 0;
+  const pursuitStrength = pursuitActive
+    ? Math.min(1, 0.5 + engine.wanted / 130 + engine.arrest / 150)
+    : 0;
+  const cameraEase = pursuitActive ? 0.06 : 0.035;
+  engine.pursuitCameraAmount += (pursuitStrength - engine.pursuitCameraAmount) * cameraEase;
+  if (!pursuitActive && engine.pursuitCameraAmount < 0.0005) {
+    engine.pursuitCameraAmount = 0;
+  }
+  const cameraAmount = engine.pursuitCameraAmount;
+  const chasePulse = 0.5 + 0.5 * Math.sin(engine.frame * 0.075);
+  const chaseZoom = 1 + cameraAmount * (0.085 + chasePulse * 0.02);
+
+  // Takip sırasında yalnızca oyun dünyasına nefes alan bir kamera baskısı uygula;
+  // HUD sabit kalır, bu yüzden bilgi okunabilirliği bozulmaz.
+  ctx.save();
+  if (cameraAmount > 0) {
+    const focusX = engine.player.x + engine.player.w / 2;
+    const focusY = engine.player.y + engine.player.h * 0.48;
+    const shakeX = (
+      Math.sin(engine.frame * 0.31) * 1.8 +
+      Math.sin(engine.frame * 0.73) * 0.8
+    ) * cameraAmount;
+    const shakeY = (
+      Math.cos(engine.frame * 0.27) * 1.15 +
+      Math.sin(engine.frame * 0.61) * 0.55
+    ) * cameraAmount;
+    const chaseTilt = Math.sin(engine.frame * 0.17) * cameraAmount * 0.0028;
+    ctx.translate(focusX + shakeX, focusY + shakeY);
+    ctx.rotate(chaseTilt);
+    ctx.scale(chaseZoom, chaseZoom);
+    ctx.translate(-focusX, -focusY);
+  }
+
   renderBackground(ctx, engine);
   drawHeadlightBeam(
     ctx,
@@ -64,8 +100,9 @@ export function renderGameView(ctx: CanvasRenderingContext2D, engine: GameEngine
   drawParticles(ctx, engine.particles);
   drawFloaters(ctx, engine.floaters);
 
+  ctx.restore();
+
   // Polis tehlike kenar efekti
-  const isChasing = engine.police.some((p) => !p.retiring);
   drawPursuitDangerEffect(
     ctx,
     engine.wanted,
@@ -74,9 +111,12 @@ export function renderGameView(ctx: CanvasRenderingContext2D, engine: GameEngine
     engine.frame,
     engine.wet,
     engine.gameMinutes,
+    engine.player.x + engine.player.w / 2,
     engine.player.y,
     engine.routePhase
   );
+
+  drawCockpitGrade(ctx);
 
   // HUD
   if (engine.state === GameStateEnum.PLAYING) {

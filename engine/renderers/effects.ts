@@ -57,6 +57,28 @@ export function drawTimeAtmosphere(ctx: CanvasRenderingContext2D, gameMinutes: n
   }
 }
 
+export function drawCockpitGrade(ctx: CanvasRenderingContext2D): void {
+  ctx.save();
+
+  const vignette = ctx.createRadialGradient(VW / 2, VH * 0.46, 130, VW / 2, VH * 0.48, 470);
+  vignette.addColorStop(0, "rgba(0,0,0,0)");
+  vignette.addColorStop(0.7, "rgba(0,0,0,.03)");
+  vignette.addColorStop(1, "rgba(0,5,8,.32)");
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, VW, VH);
+
+  const lowerGrade = ctx.createLinearGradient(0, VH * 0.45, 0, VH);
+  lowerGrade.addColorStop(0, "rgba(8,22,26,0)");
+  lowerGrade.addColorStop(1, "rgba(1,8,11,.15)");
+  ctx.fillStyle = lowerGrade;
+  ctx.fillRect(0, VH * 0.45, VW, VH * 0.55);
+
+  ctx.globalAlpha = 0.035;
+  ctx.fillStyle = "#d8fff8";
+  for (let y = 2; y < VH; y += 5) ctx.fillRect(0, y, VW, 0.55);
+  ctx.restore();
+}
+
 export function drawRain(ctx: CanvasRenderingContext2D, rain: number, frame: number): void {
   if (rain <= 0) return;
   ctx.strokeStyle = `rgba(185, 220, 236, ${0.12 + rain * 0.13})`;
@@ -79,44 +101,106 @@ export function drawPursuitDangerEffect(
   frame: number,
   wet: number,
   gameMinutes: number,
+  playerX: number,
   playerY: number,
   phase: number
 ): void {
   if (wanted < 20 && !hasActivePolice) return;
   const intensity = clamp(0.18 + ((wanted - 20) / 100) * 0.34 + (arrest / 100) * 0.58, 0, 1);
-  const pulse = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(frame * 0.19));
+  const redPulse = 0.34 + 0.66 * (0.5 + 0.5 * Math.sin(frame * 0.19));
+  const bluePulse = 0.34 + 0.66 * (0.5 + 0.5 * Math.sin(frame * 0.19 + Math.PI));
+  const sweep = 0.5 + 0.5 * Math.sin(frame * 0.055);
 
   ctx.save();
   ctx.globalCompositeOperation = "screen";
 
-  let g = ctx.createLinearGradient(0, 0, 92, 0);
-  g.addColorStop(0, `rgba(255, 42, 48, ${0.16 * intensity * pulse})`);
+  let g = ctx.createLinearGradient(0, 0, 142, 0);
+  g.addColorStop(0, `rgba(255, 32, 43, ${0.28 * intensity * redPulse})`);
+  g.addColorStop(0.34, `rgba(255, 42, 48, ${0.09 * intensity * redPulse})`);
   g.addColorStop(1, "rgba(255, 42, 48, 0)");
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 100, VH);
+  ctx.fillRect(0, 0, 150, VH);
 
-  g = ctx.createLinearGradient(VW, 0, VW - 92, 0);
-  g.addColorStop(0, `rgba(51, 135, 255, ${0.17 * intensity * (1.15 - pulse * 0.45)})`);
+  g = ctx.createLinearGradient(VW, 0, VW - 142, 0);
+  g.addColorStop(0, `rgba(31, 126, 255, ${0.3 * intensity * bluePulse})`);
+  g.addColorStop(0.34, `rgba(51, 135, 255, ${0.1 * intensity * bluePulse})`);
   g.addColorStop(1, "rgba(51, 135, 255, 0)");
   ctx.fillStyle = g;
-  ctx.fillRect(VW - 100, 0, 100, VH);
+  ctx.fillRect(VW - 150, 0, 150, VH);
+
+  // Kadrajın arkasından gelen tepe lambalarının geniş, hareketli silüeti.
+  const sirenY = VH * (0.68 + sweep * 0.035);
+  g = ctx.createRadialGradient(VW * 0.18, sirenY, 2, VW * 0.18, sirenY, 205);
+  g.addColorStop(0, `rgba(255,35,46,${0.22 * intensity * redPulse})`);
+  g.addColorStop(0.3, `rgba(255,35,46,${0.07 * intensity * redPulse})`);
+  g.addColorStop(1, "rgba(255,35,46,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, sirenY - 210, VW * 0.62, 320);
+
+  g = ctx.createRadialGradient(VW * 0.82, sirenY, 2, VW * 0.82, sirenY, 205);
+  g.addColorStop(0, `rgba(30,125,255,${0.24 * intensity * bluePulse})`);
+  g.addColorStop(0.3, `rgba(30,125,255,${0.08 * intensity * bluePulse})`);
+  g.addColorStop(1, "rgba(30,125,255,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(VW * 0.38, sirenY - 210, VW * 0.62, 320);
+
+  // Merkezden dışarı kaçan kısa hız çizgileri, takibin ivmesini hissettirir.
+  ctx.lineWidth = 1.25;
+  for (let i = 0; i < 16; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const lane = Math.floor(i / 2);
+    const y = HORIZON + 50 + ((lane * 97 + frame * (6.4 + intensity * 5)) % (VH - HORIZON - 30));
+    const startX = playerX + side * (52 + lane * 12);
+    const length = 28 + intensity * 42 + lane * 2;
+    ctx.strokeStyle = side < 0
+      ? `rgba(255,105,105,${0.08 + intensity * 0.13 * redPulse})`
+      : `rgba(104,178,255,${0.08 + intensity * 0.13 * bluePulse})`;
+    ctx.beginPath();
+    ctx.moveTo(startX, y);
+    ctx.lineTo(startX + side * length, y + 15 + intensity * 11);
+    ctx.stroke();
+  }
 
   if (wet > 0.15 || nightLevel(gameMinutes) > 0.35) {
     const y = playerY + 65;
     const half = roadHalf(y) * 0.72;
     const cx = roadCenter(y, frame, phase);
     g = ctx.createLinearGradient(cx - half, y, cx + half, y);
-    g.addColorStop(0, `rgba(255, 50, 55, ${0.05 * intensity * pulse})`);
+    g.addColorStop(0, `rgba(255, 50, 55, ${0.1 * intensity * redPulse})`);
     g.addColorStop(0.5, "rgba(0,0,0,0)");
-    g.addColorStop(1, `rgba(55, 135, 255, ${0.06 * intensity * (1.2 - pulse * 0.4)})`);
+    g.addColorStop(1, `rgba(55, 135, 255, ${0.11 * intensity * bluePulse})`);
     ctx.fillStyle = g;
     ctx.fillRect(cx - half, y - 125, half * 2, 180);
   }
 
   ctx.globalCompositeOperation = "source-over";
-  ctx.strokeStyle = `rgba(255, 95, 84, ${0.16 * intensity})`;
+
+  // Oyuncu aracını merkezde açık bırakıp çevreyi sıkıştıran gerilim tüneli.
+  // HUD bu katmandan sonra çizildiği için bilgi kontrastı etkilenmez.
+  const focusY = playerY + 42;
+  g = ctx.createRadialGradient(playerX, focusY, 72, playerX, focusY, 410);
+  g.addColorStop(0, "rgba(0,3,7,0)");
+  g.addColorStop(0.38, `rgba(0,3,7,${0.025 * intensity})`);
+  g.addColorStop(0.72, `rgba(0,3,7,${0.14 * intensity})`);
+  g.addColorStop(1, `rgba(0,2,5,${0.34 * intensity})`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, VW, VH);
+
+  // Yakalanma yükseldikçe aracın çevresinde nabız gibi daralan ince bir tehdit halkası.
+  const ringPulse = 0.5 + 0.5 * Math.sin(frame * 0.14);
+  const ringRadius = 74 + (1 - ringPulse) * 17;
+  ctx.beginPath();
+  ctx.arc(playerX, focusY, ringRadius, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(255,92,86,${intensity * (0.035 + arrest / 1000) * ringPulse})`;
+  ctx.lineWidth = 1.2 + intensity;
+  ctx.stroke();
+
+  ctx.strokeStyle = `rgba(255, 95, 84, ${(0.12 + redPulse * 0.12) * intensity})`;
   ctx.lineWidth = 2;
   ctx.strokeRect(3, 3, VW - 6, VH - 6);
+  ctx.strokeStyle = `rgba(80, 154, 255, ${(0.08 + bluePulse * 0.1) * intensity})`;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(7, 7, VW - 14, VH - 14);
   ctx.restore();
 }
 

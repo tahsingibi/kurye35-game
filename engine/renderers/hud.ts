@@ -15,12 +15,13 @@ export function drawSpeedometer(
   const ratio = clamp(speed / maxKmh, 0, 1);
   ctx.save();
 
-  // Yüksek kontrastlı arka plan ve dış parlama
-  ctx.fillStyle = "rgba(4,7,11,.88)";
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = "rgba(93,230,207,.16)";
+  ctx.fillStyle = "rgba(3,9,13,.92)";
   ctx.beginPath();
   ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "rgba(115,224,209,.35)";
+  ctx.strokeStyle = "rgba(93,230,207,.42)";
   ctx.lineWidth = 1.4;
   ctx.stroke();
 
@@ -37,9 +38,9 @@ export function drawSpeedometer(
 
   // Renkli hız yayı
   const grad = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
-  grad.addColorStop(0, "#4ade80");
-  grad.addColorStop(0.6, "#facc15");
-  grad.addColorStop(1, "#f87171");
+  grad.addColorStop(0, "#5de6cf");
+  grad.addColorStop(0.68, "#ffc766");
+  grad.addColorStop(1, "#ff6b63");
   ctx.strokeStyle = grad;
   ctx.lineWidth = r > 32 ? 5 : 4;
   ctx.beginPath();
@@ -107,13 +108,13 @@ export function drawCanvasHUD(
   joystickPosition: "left" | "right" = "left",
   buttonSize: "small" | "medium" | "large" = "medium"
 ): void {
-  const panelBg = "rgba(7,11,16,.80)";
-  const panelBorder = "rgba(255,255,255,.14)";
+  const panelBg = "rgba(3,9,13,.86)";
+  const panelBorder = "rgba(196,238,230,.15)";
 
   // Üst panel gölgesi
   const topFade = ctx.createLinearGradient(0, 0, 0, 160);
-  topFade.addColorStop(0, "rgba(2,4,7,.70)");
-  topFade.addColorStop(0.7, "rgba(2,4,7,.25)");
+  topFade.addColorStop(0, "rgba(1,6,9,.76)");
+  topFade.addColorStop(0.7, "rgba(1,6,9,.22)");
   topFade.addColorStop(1, "rgba(2,4,7,0)");
   ctx.fillStyle = topFade;
   ctx.fillRect(0, 0, VW, 160);
@@ -125,9 +126,13 @@ export function drawCanvasHUD(
   ctx.strokeStyle = panelBorder;
   ctx.stroke();
 
-  drawText(ctx, phase.name, 28, 64, 8, 950, "#73e0d1");
+  ctx.fillStyle = "rgba(93,230,207,.75)";
+  roundRect(ctx, 14, 44, 4, 70, 2);
+  ctx.fill();
+
+  drawText(ctx, `ROTA · ${phase.name}`, 28, 64, 7.2, 950, "#5de6cf");
   drawText(ctx, phase.sub, 28, 85, 14, 950, "#f6f7f6");
-  drawText(ctx, missionTitle, 28, 103, 8.2, 700, "#82919c");
+  drawText(ctx, missionTitle.toUpperCase(), 28, 103, 7.4, 800, "#82919c");
   drawText(ctx, missionProgress, 216, 103, 8.5, 900, "#ccd5db", "right");
 
   // 2. Sağ üst: Skor ve teslimat
@@ -137,8 +142,8 @@ export function drawCanvasHUD(
   ctx.strokeStyle = panelBorder;
   ctx.stroke();
 
-  drawText(ctx, "TESLİMAT", 254, 64, 7.2, 900, "#7d8b96");
-  drawText(ctx, String(deliveries).padStart(2, "0"), 254, 91, 23, 950, "#f2c46d");
+  drawText(ctx, "TESLİMAT", 254, 64, 7.2, 900, "#8da19f");
+  drawText(ctx, String(deliveries).padStart(2, "0"), 254, 91, 23, 950, "#ffc766");
   drawText(ctx, "PUAN", 420, 64, 7.2, 900, "#7d8b96", "right");
   drawText(ctx, Math.floor(score).toLocaleString("tr-TR"), 420, 89, 13, 900, "#f3f5f5", "right");
   drawText(ctx, `★ ${unlockedCount}/${totalAchievements}`, 420, 106, 6.7, 900, "#dcbf74", "right");
@@ -149,7 +154,7 @@ export function drawCanvasHUD(
   ctx.fill();
   ctx.strokeStyle = panelBorder;
   ctx.stroke();
-  drawText(ctx, `${clockText} · ${speed} KM/H`, 373, 138, 8.2, 950, isTouch ? "#38bdf8" : "#d9e5eb", "center");
+  drawText(ctx, `${clockText}  ·  ${phaseText}`, 373, 138, 7.8, 950, isTouch ? "#5de6cf" : "#d9e5eb", "center");
 
   // 4. Sağlık Göstergesi: Mobilde yukarıda, masaüstünde sol altta
   if (isTouch) {
@@ -158,7 +163,7 @@ export function drawCanvasHUD(
     ctx.fill();
     ctx.strokeStyle = panelBorder;
     ctx.stroke();
-    drawText(ctx, "♥ SAĞLIK", 24, 138, 7.2, 950, "#94a3b8");
+    drawText(ctx, "DURUM", 24, 138, 7.2, 950, "#94a3b8");
     drawText(ctx, `${Math.round(health)}%`, 102, 138, 9.5, 950, health < 35 ? "#f87171" : "#4ade80", "right");
   } else {
     ctx.fillStyle = panelBg;
@@ -166,7 +171,7 @@ export function drawCanvasHUD(
     ctx.fill();
     ctx.strokeStyle = panelBorder;
     ctx.stroke();
-    drawText(ctx, "SAĞLIK", 28, 729, 7.2, 950, "#788994");
+    drawText(ctx, "ARAÇ", 28, 729, 7.2, 950, "#788994");
     drawText(ctx, `${Math.round(health)}%`, 28, 754, 18, 950, health < 35 ? "#ff786d" : "#88e2ae");
     ctx.fillStyle = "rgba(255,255,255,.08)";
     roundRect(ctx, 28, 762, 62, 4, 2);

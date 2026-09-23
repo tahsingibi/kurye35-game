@@ -8,6 +8,7 @@ import { renderGameView, renderBackground } from "@/engine/game-renderer";
 import { GameStateEnum } from "@/engine/types";
 import { TouchControls } from "@/components/touch-controls";
 import { JoystickPosition, ButtonSize } from "@/utils/settings";
+import { PauseIcon } from "@/components/ui/icons";
 
 interface GameCanvasProps {
   engine: GameEngine;
@@ -73,9 +74,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (isTouchDev) inputMgr.joystickMode = true;
 
     const onVisibilityChange = () => {
-      if (document.hidden) engine.togglePause();
+      if (document.hidden) engine.pause();
     };
-    const onBlur = () => engine.togglePause();
+    const onBlur = () => engine.pause();
 
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("blur", onBlur);
@@ -155,10 +156,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       {isPlaying && (
         <button
           onClick={() => engine.togglePause()}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-12 h-12 rounded-2xl bg-slate-900/85 border border-slate-600/70 hover:bg-slate-800 active:scale-90 active:bg-slate-700 text-slate-100 flex items-center justify-center font-black text-lg shadow-xl shadow-black/60 pointer-events-auto z-30 transition-transform select-none"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 rounded-2xl bg-[#071116]/85 border border-white/15 hover:border-teal-300/50 active:scale-90 active:bg-teal-300/15 text-slate-100 backdrop-blur-xl flex items-center justify-center font-black text-sm shadow-xl shadow-black/50 pointer-events-auto z-30 transition-all select-none"
           aria-label="Duraklat"
         >
-          <span className="leading-none">Ⅱ</span>
+          <PauseIcon className="h-5 w-5" />
         </button>
       )}
     </>

@@ -21,14 +21,20 @@
 - **Canvas 2D Motoru**: 60 FPS akıcı piksel fiziği, dinamik araç trafik simülasyonu ve parçacık efektleri.
 - **İzmir Rotaları**: Konak Saat Kulesi, Alsancak Liman Hattı, Kordon boyu, Altınyol viyadükleri ve Karşıyaka sahil şeridi.
 - **Günün Evreleri & Hava Durumu**: Şafak, gündüz, akşam kızıllığı ve neon gece atmosferi; yağmurlu zeminlerde değişen yol tutuşu.
-- **Vardiya Mekanikleri**: Seri teslimat comboları, aşırı hız ihlalleri, aranma seviyesi ve peşine düşen polis takibi.
+- **Vardiya Mekanikleri**: Seri teslimat comboları, aşırı hız ihlalleri, aranma seviyesi ve peşine düşen polis takibi. Takip sırasında HUD sabit kalırken oyun dünyası kontrollü kamera zoom'u, hafif sarsıntı, hız çizgileri ve güçlendirilmiş kırmızı-mavi tepe lambası yansımalarıyla aksiyon kazanır.
 - **Responsive Tam Ekran Kokpit HUD**:
   - Webde kullanılabilir yüksekliği tamamen kullanan, 9:16 oyun oranını bozmadan mobilde responsive kalan oyun yüzeyi.
   - Temiz sürüş, son ihlal ve polis takibini oyun alanının üst bilgi katmanında sürekli görünür tutan durum şeridi.
   - Mobil kontrol butonlarından tamamen ayrılmış sağ üst spor ibreli hız kadranı.
   - Başparmak ergonomisine uygun D-Pad yön butonları, Gaz, Fren ve interaktif NOS pedalları (Solak/Sağlak el desteğiyle).
+  - Menü, hikâye, araç garajı, ayarlar, duraklatma ve vardiya sonu ekranlarını ortak bir modern arcade tasarım sistemi altında birleştiren erişilebilir arayüz.
+  - Turkuaz sistem, amber teslimat ve kırmızı tehlike renkleriyle tutarlı; atmosferik vignette ve hafif ekran dokusuna sahip görsel dil.
+- **Özgün Görsel Varlıklar & Tipografi**:
+  - İzmir körfezi, gece vardiyası ve kurye temasına özel üretilmiş dikey ana menü illüstrasyonu.
+  - Garaj ekranı için şeffaf arka planlı, aynı sanat yönetimini paylaşan motosiklet ve kurye otomobili renderları.
+  - Arayüzde `Space Grotesk Variable`, başlık ve Canvas HUD katmanında `Rajdhani` tipografi sistemi.
 - **Yerelleştirme (i18n)**: Çoklu dil desteği.
-- **PWA & Çevrimdışı Oynanabilirlik**: Service worker desteğiyle mobil cihazlara yüklenebilir ve internetsiz oynanabilir.
+- **PWA & Çevrimdışı Oynanabilirlik**: Service worker; Next.js uygulama kabuğunu, ana menü/araç illüstrasyonlarını ve yerel fontları kurulum sırasında önbelleğe alır. İlk başarılı çevrimiçi kurulumdan sonra oyun mobil cihazlara yüklenebilir ve internetsiz açılabilir.
 - **Gelişmiş Kalıcılık**: Yüksek skor, rekor teslimat, seçilen araç ve 8 özel başarım `localStorage` üzerinde saklanır.
 
 ---

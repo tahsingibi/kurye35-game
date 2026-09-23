@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { t } from "@/utils/localization";
 import { playVehicleRev } from "@/engine/audio";
 import type { VehicleType } from "@/utils/settings";
+import { ArrowRightIcon, CheckIcon, CloseIcon, SpeakerIcon } from "@/components/ui/icons";
 
 interface VehicleSelectModalProps {
   isOpen: boolean;
@@ -16,7 +18,7 @@ interface VehicleSelectModalProps {
 
 interface VehicleOption {
   type: VehicleType;
-  icon: string;
+  image: string;
   nameKey: string;
   tagKey: string;
   descKey: string;
@@ -30,7 +32,7 @@ interface VehicleOption {
 const VEHICLES: VehicleOption[] = [
   {
     type: "motor",
-    icon: "🛵",
+    image: "/art/courier-motor.png",
     nameKey: "vehicles.motor.name",
     tagKey: "vehicles.motor.tag",
     descKey: "vehicles.motor.desc",
@@ -38,7 +40,7 @@ const VEHICLES: VehicleOption[] = [
   },
   {
     type: "car",
-    icon: "🚗",
+    image: "/art/courier-car.png",
     nameKey: "vehicles.car.name",
     tagKey: "vehicles.car.tag",
     descKey: "vehicles.car.desc",
@@ -74,19 +76,17 @@ export const VehicleSelectModal: React.FC<VehicleSelectModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none bg-black/75 backdrop-blur-md">
-      <div className="relative w-full max-w-md p-5 rounded-3xl bg-slate-900/95 border border-slate-700/70 shadow-2xl space-y-4 text-left">
+    <div className="ui-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-3 select-none">
+      <div className="ui-panel ui-rise relative w-full max-w-md max-h-[96dvh] overflow-y-auto p-5 rounded-[28px] space-y-4 text-left">
         {/* Üst Başlık & Kapat */}
         <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-950/80 border border-teal-500/40 text-teal-300 text-[11px] font-black uppercase tracking-wider">
-            🚦 {t("vehicles.select_title")}
-          </div>
+          <div><div className="ui-kicker">GARAGE 35</div><h2 className="mt-2 text-2xl font-black tracking-tight text-white">{t("vehicles.select_title")}</h2></div>
           <button
             onClick={handleClose}
-            className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm font-black transition active:scale-95"
+            className="ui-icon-button active:scale-95"
             aria-label="Kapat"
           >
-            ✕
+            <CloseIcon className="h-4 w-4" />
           </button>
         </div>
 
@@ -101,20 +101,18 @@ export const VehicleSelectModal: React.FC<VehicleSelectModalProps> = ({
             return (
               <div
                 key={v.type}
-                className={`relative flex flex-col justify-between p-3 rounded-2xl border transition-all ${
+                className={`relative flex flex-col justify-between p-3.5 rounded-2xl border transition-all ${
                   isSelected
-                    ? "bg-slate-950/90 border-teal-400/80 shadow-lg shadow-teal-500/15"
-                    : "bg-slate-950/50 border-slate-800 hover:border-slate-700"
+                    ? "bg-teal-300/[.07] border-teal-300/70 shadow-lg shadow-teal-500/10"
+                    : "bg-black/20 border-white/10 hover:border-white/20"
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">{v.icon}</span>
+                  <div className="relative mb-3 h-24 overflow-hidden rounded-xl border border-white/10 bg-[radial-gradient(circle_at_50%_70%,rgba(93,230,207,.16),transparent_62%)]">
+                    <Image src={v.image} alt={t(v.nameKey)} fill className="object-contain p-1 drop-shadow-[0_12px_18px_rgba(0,0,0,.55)]" />
                     <span
-                      className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                        isSelected
-                          ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
-                          : "bg-slate-800/80 text-slate-400"
+                      className={`absolute right-2 top-2 text-[8px] font-black uppercase px-2 py-1 rounded-full ${
+                        isSelected ? "bg-teal-300/15 text-teal-200 border border-teal-300/30" : "bg-white/[.05] text-slate-400"
                       }`}
                     >
                       {t(v.tagKey)}
@@ -142,18 +140,18 @@ export const VehicleSelectModal: React.FC<VehicleSelectModalProps> = ({
                     className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 text-xs font-bold transition flex items-center justify-center"
                     aria-label={t("vehicles.preview_sound")}
                   >
-                    🔊
+                    <SpeakerIcon className="h-4 w-4" />
                   </button>
 
                   <button
                     onClick={() => handleSelect(v.type)}
                     className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-black tracking-wider transition active:scale-95 text-center ${
                       isSelected
-                        ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                        : "bg-slate-800/90 hover:bg-slate-700 text-slate-200"
+                        ? "bg-teal-300 text-slate-950 shadow-md shadow-teal-500/20"
+                        : "bg-white/[.07] hover:bg-white/[.12] text-slate-200"
                     }`}
                   >
-                    {isSelected ? `✓ ${t("vehicles.selected")}` : t("vehicles.select")}
+                    {isSelected ? <span className="inline-flex items-center justify-center gap-1.5"><CheckIcon className="h-3.5 w-3.5" />{t("vehicles.selected")}</span> : t("vehicles.select")}
                   </button>
                 </div>
               </div>
@@ -165,10 +163,10 @@ export const VehicleSelectModal: React.FC<VehicleSelectModalProps> = ({
         {isStartingFlow ? (
           <button
             onClick={handleStart}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-slate-950 font-black text-xs tracking-wider shadow-xl active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+            className="ui-primary w-full py-3.5 px-4 rounded-2xl text-slate-950 font-black text-xs tracking-wider active:scale-95 transition-all text-center flex items-center justify-center gap-2"
           >
             <span>{t("vehicles.start_shift")}</span>
-            <span>→</span>
+            <ArrowRightIcon className="h-4 w-4" />
           </button>
         ) : null}
       </div>

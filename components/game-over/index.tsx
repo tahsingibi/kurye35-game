@@ -4,6 +4,7 @@ import React from "react";
 import { t } from "@/utils/localization";
 import { ACHIEVEMENTS_DATA } from "@/engine/constants";
 import { SOCIAL_LINKS } from "@/utils/config";
+import { RestartIcon } from "@/components/ui/icons";
 
 interface GameOverProps {
   reason: "crash" | "busted";
@@ -15,7 +16,6 @@ interface GameOverProps {
   bestDeliveries: number;
   unlockedCount: number;
   onRestart: () => void;
-  onShare?: () => void;
 }
 
 export const GameOver: React.FC<GameOverProps> = ({
@@ -33,11 +33,10 @@ export const GameOver: React.FC<GameOverProps> = ({
   const totalBadges = Object.keys(ACHIEVEMENTS_DATA).length;
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col justify-between p-6 pointer-events-auto select-none bg-slate-950/85 backdrop-blur-md">
-      {/* Üst Başlık */}
-      <div className="pt-3 space-y-2">
+    <div className="ui-modal-backdrop absolute inset-0 z-40 flex flex-col justify-between px-5 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))] pointer-events-auto select-none">
+      <div className="ui-rise space-y-3">
         <div
-          className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border ${
+          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-[.16em] ${
             isBusted
               ? "bg-blue-950/80 border-blue-500/40 text-blue-300"
               : "bg-red-950/80 border-red-500/40 text-red-300"
@@ -45,26 +44,25 @@ export const GameOver: React.FC<GameOverProps> = ({
         >
           {isBusted ? t("game_over.busted_badge") : t("game_over.crash_badge")}
         </div>
-        <h2 className="text-4xl font-black text-slate-100 tracking-tight">
+        <h2 className="text-[2.65rem] font-black leading-none tracking-[-.05em] text-white">
           {isBusted ? t("game_over.busted_title") : t("game_over.crash_title")}
         </h2>
-        <p className="text-xs font-medium text-slate-400">
+        <p className="text-sm font-medium text-slate-400">
           {isBusted ? t("game_over.busted_desc") : t("game_over.crash_desc")}
         </p>
       </div>
 
-      {/* İstatistikler Paneli */}
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-2 border-y border-slate-700/50 py-4">
-          <div>
+      <div className="ui-rise space-y-3">
+        <div className="ui-panel grid grid-cols-3 overflow-hidden rounded-3xl">
+          <div className="p-4">
             <div className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
               {t("game_over.score")}
             </div>
-            <div className="text-2xl font-black text-slate-100">
+            <div className="mt-1 text-2xl font-black text-white">
               {Math.floor(score).toLocaleString("tr-TR")}
             </div>
           </div>
-          <div>
+          <div className="border-l border-white/10 p-4">
             <div className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
               {t("game_over.deliveries")}
             </div>
@@ -72,7 +70,7 @@ export const GameOver: React.FC<GameOverProps> = ({
               {deliveries}
             </div>
           </div>
-          <div>
+          <div className="border-l border-white/10 p-4">
             <div className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
               {t("game_over.violations")}
             </div>
@@ -82,8 +80,7 @@ export const GameOver: React.FC<GameOverProps> = ({
           </div>
         </div>
 
-        {/* Son Kayıt Kartı */}
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-700/60 shadow-lg space-y-1">
+        <div className="rounded-2xl border border-white/10 bg-white/[.035] p-4 space-y-1">
           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             {t("game_over.last_record")}
           </div>
@@ -96,15 +93,14 @@ export const GameOver: React.FC<GameOverProps> = ({
         </div>
       </div>
 
-      {/* Butonlar ve Bağlantılar (Skoru Paylaş butonu tasarım hazır olana kadar gizlendi) */}
-      <div className="pb-4 space-y-3">
+      <div className="space-y-2.5">
         <button
           onClick={onRestart}
-          className="group w-full flex items-center justify-between px-6 py-4 rounded-full bg-[#f3f3ee] text-slate-900 font-black text-xs tracking-wider shadow-xl hover:bg-white active:scale-95 transition-all"
+          className="ui-primary group flex w-full items-center justify-between rounded-2xl px-5 py-4 text-xs font-black tracking-wider transition-all"
         >
           <span>{t("game_over.restart")}</span>
-          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-950 text-white group-hover:rotate-180 transition-transform duration-300">
-            ↻
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#07100f] text-white transition-transform duration-300 group-hover:rotate-180">
+            <RestartIcon className="h-4 w-4" />
           </span>
         </button>
 

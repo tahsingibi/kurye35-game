@@ -1,15 +1,37 @@
-const CACHE_NAME = "kurye35-v1";
+const CACHE_NAME = "kurye35-v3-offline-art-fonts";
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
+  "/favicon.ico",
+  "/apple-touch-icon.png",
   "/icon-192.png",
-  "/icon-512.png"
+  "/icon-512.png",
+  "/art/izmir-shift-key-art.png",
+  "/art/courier-motor.png",
+  "/art/courier-car.png",
+  "/fonts/space-grotesk-latin-wght-normal.woff2",
+  "/fonts/space-grotesk-latin-ext-wght-normal.woff2",
+  "/fonts/rajdhani-latin-700-normal.woff2",
+  "/fonts/rajdhani-latin-ext-700-normal.woff2"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(STATIC_ASSETS);
+
+      // Next.js'in hash'li JS/CSS dosyalarını da kurulum anında keşfedip sakla.
+      // Böylece ilk başarılı kurulumdan sonraki ilk offline açılışta oyun motoru da hazırdır.
+      try {
+        const shellResponse = await fetch(new Request("/", { cache: "reload" }));
+        const html = await shellResponse.clone().text();
+        const shellAssets = [...html.matchAll(/(?:src|href)=["'](\/_next\/static\/[^"']+)["']/g)]
+          .map((match) => match[1]);
+        await Promise.all([...new Set(shellAssets)].map((asset) => cache.add(asset)));
+        await cache.put("/", shellResponse);
+      } catch (_error) {
+        // Statik görseller ve fontlar zaten cache'te; shell keşfi sonraki online istekte tamamlanır.
+      }
     }).then(() => self.skipWaiting())
   );
 });

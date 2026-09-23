@@ -34,6 +34,7 @@ export class GameEngine {
   chaseWasActive = false;
   policeCooldown = 0;
   sirenCooldown = 0;
+  pursuitCameraAmount = 0;
 
   violations = 0;
   lastViolation = "Yok";
@@ -354,6 +355,7 @@ export class GameEngine {
     this.chaseWasActive = false;
     this.policeCooldown = 0;
     this.sirenCooldown = 0;
+    this.pursuitCameraAmount = 0;
     this.violations = 0;
     this.lastViolation = "Yok";
     this.cleanMissionFrames = 0;
@@ -401,16 +403,21 @@ export class GameEngine {
 
   togglePause(): void {
     if (this.state === 2) {
-      stopEngineSound();
-      this.state = 4; // PAUSED
-      this.controls.throttle = false;
-      this.controls.brake = false;
-      this.onStateChange?.(this.state);
+      this.pause();
     } else if (this.state === 4) {
       startEngineSound(this.vehicleType);
       this.state = 2; // PLAYING
       this.onStateChange?.(this.state);
     }
+  }
+
+  pause(): void {
+    if (this.state !== 2) return;
+    stopEngineSound();
+    this.state = 4; // PAUSED
+    this.controls.throttle = false;
+    this.controls.brake = false;
+    this.onStateChange?.(this.state);
   }
 
   update(): void {

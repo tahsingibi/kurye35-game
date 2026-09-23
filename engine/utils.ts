@@ -23,7 +23,7 @@ export function drawText(
   align: CanvasTextAlign = "left"
 ): void {
   ctx.fillStyle = color;
-  ctx.font = `${weight} ${size}px system-ui, -apple-system, sans-serif`;
+  ctx.font = `${weight} ${size}px Rajdhani, "Arial Narrow", sans-serif`;
   ctx.textAlign = align;
   ctx.fillText(s, x, y);
 }

@@ -3,6 +3,7 @@
 import React from "react";
 import { t } from "@/utils/localization";
 import { JoystickPosition, ButtonSize, SoundSettings } from "@/utils/settings";
+import { ArrowLeftIcon, ArrowRightIcon, CloseIcon } from "@/components/ui/icons";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -28,26 +29,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 select-none bg-black/75 backdrop-blur-md">
-      <div className="relative w-full max-w-md max-h-[94dvh] overflow-y-auto p-4 sm:p-6 rounded-3xl bg-slate-900/95 border border-slate-700/70 shadow-2xl space-y-4 text-left">
+    <div className="ui-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 select-none">
+      <div className="ui-panel ui-rise relative w-full max-w-md max-h-[94dvh] overflow-y-auto p-4 sm:p-6 rounded-[28px] space-y-4 text-left">
         {/* Üst Başlık & Kapat Butonu */}
         <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-950/80 border border-teal-500/40 text-teal-300 text-[11px] font-black uppercase tracking-wider">
-            ⚙️ {t("settings.title")}
-          </div>
+          <div><div className="ui-kicker">SYSTEM</div><h2 className="mt-2 text-2xl font-black tracking-tight text-white">{t("settings.title")}</h2></div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm font-black transition active:scale-95"
+            className="ui-icon-button active:scale-95"
             aria-label="Kapat"
           >
-            ✕
+            <CloseIcon className="h-4 w-4" />
           </button>
         </div>
 
         {/* 1. Kontrol Buton Boyutu */}
-        <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-            <span>📐 {t("settings.button_size")}</span>
+            <span>{t("settings.button_size")}</span>
             <span className="text-[11px] text-teal-400 font-black uppercase">
               {buttonSize === "small"
                 ? t("settings.size_small")
@@ -61,8 +60,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClick={() => onChangeButtonSize("small")}
               className={`py-2 px-1.5 rounded-xl text-xs font-black transition-all ${
                 buttonSize === "small"
-                  ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                  : "bg-slate-800/80 text-slate-400 hover:text-white"
+                  ? "bg-teal-300 text-slate-950 shadow-md shadow-teal-500/20"
+                  : "bg-white/[.05] text-slate-400 hover:text-white"
               }`}
             >
               {t("settings.size_small")}
@@ -71,8 +70,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClick={() => onChangeButtonSize("medium")}
               className={`py-2 px-1.5 rounded-xl text-xs font-black transition-all ${
                 buttonSize === "medium"
-                  ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                  : "bg-slate-800/80 text-slate-400 hover:text-white"
+                  ? "bg-teal-300 text-slate-950 shadow-md shadow-teal-500/20"
+                  : "bg-white/[.05] text-slate-400 hover:text-white"
               }`}
             >
               {t("settings.size_medium")}
@@ -81,8 +80,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClick={() => onChangeButtonSize("large")}
               className={`py-2 px-1.5 rounded-xl text-xs font-black transition-all ${
                 buttonSize === "large"
-                  ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                  : "bg-slate-800/80 text-slate-400 hover:text-white"
+                  ? "bg-teal-300 text-slate-950 shadow-md shadow-teal-500/20"
+                  : "bg-white/[.05] text-slate-400 hover:text-white"
               }`}
             >
               {t("settings.size_large")}
@@ -91,9 +90,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* 2. Kontrol Düzeni (Sol/Sağ Yön) */}
-        <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-            <span>🕹️ {t("settings.controls_layout")}</span>
+            <span>{t("settings.controls_layout")}</span>
             <span className="text-[11px] text-teal-400 font-black uppercase">
               {joystickPosition === "left" ? t("settings.steer_left") : t("settings.steer_right")}
             </span>
@@ -103,30 +102,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClick={() => onChangeJoystickPosition("left")}
               className={`py-2 px-2.5 rounded-xl text-xs font-black transition-all ${
                 joystickPosition === "left"
-                  ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                  : "bg-slate-800/80 text-slate-400 hover:text-white"
+                  ? "bg-teal-300 text-slate-950 shadow-md shadow-teal-500/20"
+                  : "bg-white/[.05] text-slate-400 hover:text-white"
               }`}
             >
-              ← {t("settings.steer_left")}
+              <span className="inline-flex items-center justify-center gap-1.5"><ArrowLeftIcon className="h-3.5 w-3.5" />{t("settings.steer_left")}</span>
             </button>
             <button
               onClick={() => onChangeJoystickPosition("right")}
               className={`py-2 px-2.5 rounded-xl text-xs font-black transition-all ${
                 joystickPosition === "right"
-                  ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                  : "bg-slate-800/80 text-slate-400 hover:text-white"
+                  ? "bg-teal-300 text-slate-950 shadow-md shadow-teal-500/20"
+                  : "bg-white/[.05] text-slate-400 hover:text-white"
               }`}
             >
-              {t("settings.steer_right")} →
+              <span className="inline-flex items-center justify-center gap-1.5">{t("settings.steer_right")}<ArrowRightIcon className="h-3.5 w-3.5" /></span>
             </button>
           </div>
         </div>
 
         {/* 3. Ayrıntılı ses mikseri */}
-        <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2.5">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3.5 space-y-2.5">
           <div className="flex items-center justify-between pb-1">
             <div>
-              <div className="text-xs font-black text-slate-200">🔊 {t("settings.audio_mixer")}</div>
+              <div className="text-xs font-black text-slate-200">{t("settings.audio_mixer")}</div>
               <div className="mt-1 text-[10px] text-slate-500">{t("settings.audio_mixer_desc")}</div>
             </div>
             <SoundToggle
@@ -138,19 +137,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
           <div className="h-px bg-slate-800" />
           <SoundToggle
-            label={`🏍️ ${t("settings.vehicle_sounds")}`}
+            label={t("settings.vehicle_sounds")}
             enabled={soundSettings.vehicle}
             disabled={!soundSettings.master}
             onToggle={() => onChangeSoundSettings({ ...soundSettings, vehicle: !soundSettings.vehicle })}
           />
           <SoundToggle
-            label={`🌧️ ${t("settings.ambient_sounds")}`}
+            label={t("settings.ambient_sounds")}
             enabled={soundSettings.ambience}
             disabled={!soundSettings.master}
             onToggle={() => onChangeSoundSettings({ ...soundSettings, ambience: !soundSettings.ambience })}
           />
           <SoundToggle
-            label={`✨ ${t("settings.effect_sounds")}`}
+            label={t("settings.effect_sounds")}
             enabled={soundSettings.effects}
             disabled={!soundSettings.master}
             onToggle={() => onChangeSoundSettings({ ...soundSettings, effects: !soundSettings.effects })}
@@ -160,7 +159,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* Tamamla / Kapat Butonu */}
         <button
           onClick={onClose}
-          className="w-full py-3.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-sm tracking-wider shadow-lg active:scale-95 transition-all text-center"
+          className="ui-primary w-full py-3.5 rounded-2xl font-black text-sm tracking-wider active:scale-95 transition-all text-center"
         >
           {t("settings.close")}
         </button>
