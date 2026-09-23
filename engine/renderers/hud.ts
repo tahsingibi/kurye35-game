@@ -16,12 +16,12 @@ export function drawSpeedometer(
   ctx.save();
 
   // Yüksek kontrastlı arka plan ve dış parlama
-  ctx.fillStyle = "rgba(4,7,11,.92)";
+  ctx.fillStyle = "rgba(4,7,11,.88)";
   ctx.beginPath();
-  ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+  ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "rgba(115,224,209,.3)";
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(115,224,209,.35)";
+  ctx.lineWidth = 1.4;
   ctx.stroke();
 
   const a0 = Math.PI * 0.76;
@@ -30,7 +30,7 @@ export function drawSpeedometer(
 
   // Arka halka izi
   ctx.strokeStyle = "rgba(255,255,255,.14)";
-  ctx.lineWidth = 5;
+  ctx.lineWidth = r > 32 ? 5 : 4;
   ctx.beginPath();
   ctx.arc(cx, cy, r, a0, a1);
   ctx.stroke();
@@ -41,7 +41,7 @@ export function drawSpeedometer(
   grad.addColorStop(0.6, "#facc15");
   grad.addColorStop(1, "#f87171");
   ctx.strokeStyle = grad;
-  ctx.lineWidth = 5;
+  ctx.lineWidth = r > 32 ? 5 : 4;
   ctx.beginPath();
   ctx.arc(cx, cy, r, a0, a0 + span * ratio);
   ctx.stroke();
@@ -49,10 +49,10 @@ export function drawSpeedometer(
   // Kadran çizgileri
   for (let i = 0; i <= 8; i++) {
     const a = a0 + span * (i / 8);
-    const inner = r - 7;
+    const inner = r - (r > 32 ? 7 : 5);
     const outer = r - 2;
     ctx.strokeStyle = i <= Math.round(ratio * 8) ? "#ffffff" : "rgba(255,255,255,.25)";
-    ctx.lineWidth = i % 2 === 0 ? 1.6 : 1;
+    ctx.lineWidth = i % 2 === 0 ? 1.5 : 1;
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner);
     ctx.lineTo(cx + Math.cos(a) * outer, cy + Math.sin(a) * outer);
@@ -62,21 +62,21 @@ export function drawSpeedometer(
   // İbre
   const needleA = a0 + span * ratio;
   ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2.2;
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + Math.cos(needleA) * (r - 9), cy + Math.sin(needleA) * (r - 9));
+  ctx.lineTo(cx + Math.cos(needleA) * (r - (r > 32 ? 9 : 7)), cy + Math.sin(needleA) * (r - (r > 32 ? 9 : 7)));
   ctx.stroke();
 
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
   ctx.fill();
 
-  // Sayısal KM/H Değeri - Çok net ve yüksek kontrastlı
+  // Sayısal KM/H Değeri
   const numColor = isBraking ? "#f87171" : isThrottling ? "#4ade80" : "#ffffff";
-  drawText(ctx, String(speed), cx, cy + 5, r > 34 ? 17 : 15, 950, numColor, "center");
-  drawText(ctx, "KM/H", cx, cy + 18, 6.5, 950, "#94a3b8", "center");
+  drawText(ctx, String(speed), cx, cy + (r > 32 ? 5 : 4), r > 32 ? 16 : 13.5, 950, numColor, "center");
+  drawText(ctx, "KM/H", cx, cy + (r > 32 ? 17 : 14), r > 32 ? 6.5 : 5.5, 950, "#94a3b8", "center");
   ctx.restore();
 }
 
@@ -176,15 +176,12 @@ export function drawCanvasHUD(
     ctx.fill();
   }
 
-  // 5. Hız Göstergesi: Mobilde buton boyutuna göre dinamik konumlanır
-  const speedCy = !isTouch
-    ? 750
-    : buttonSize === "large"
-    ? 600
-    : buttonSize === "medium"
-    ? 630
-    : 660;
-  const speedR = !isTouch ? 38 : (buttonSize === "large" ? 31 : 34);
+  // 5. Hız Göstergesi:
+  // UX Game Design: Mobilde ekranın alt merkezinde (cy: 746, r: 29) konumlandırılarak
+  // oyuncu aracının (y: 520..560) kesinlikle kapanmaması ve iki kontrol kümesi arasında
+  // şık bir spor kadran podu oluşturması sağlandı.
+  const speedCy = isTouch ? 746 : 750;
+  const speedR = isTouch ? 29 : 38;
 
   drawSpeedometer(
     ctx,

@@ -1,9 +1,11 @@
 export type JoystickPosition = "left" | "right";
 export type ButtonSize = "small" | "medium" | "large";
+export type VehicleType = "motor" | "car";
 
 const JOYSTICK_KEY = "kurye35_joystick_pos_side";
 const BUTTON_SIZE_KEY = "kurye35_button_size";
 const SOUND_KEY = "kurye35_sound_enabled";
+const VEHICLE_KEY = "kurye35_selected_vehicle";
 
 export function getJoystickPosition(): JoystickPosition {
   if (typeof window === "undefined") return "left";
@@ -53,5 +55,21 @@ export function getSoundEnabled(): boolean {
 export function setSoundEnabled(enabled: boolean): void {
   try {
     localStorage.setItem(SOUND_KEY, String(enabled));
+  } catch {}
+}
+
+export function getSelectedVehicle(): VehicleType {
+  if (typeof window === "undefined") return "motor";
+  try {
+    const saved = localStorage.getItem(VEHICLE_KEY);
+    return saved === "car" ? "car" : "motor";
+  } catch {
+    return "motor";
+  }
+}
+
+export function setSelectedVehicle(vehicle: VehicleType): void {
+  try {
+    localStorage.setItem(VEHICLE_KEY, vehicle);
   } catch {}
 }

@@ -32,12 +32,14 @@ export function drawHeadlightBeam(
   if (n < 0.18) return;
   const cx = playerX + playerW / 2;
   const topY = HORIZON + 55;
+  const beamSpread = Math.max(13, playerW * 0.38);
+
   ctx.save();
   ctx.beginPath();
-  ctx.moveTo(cx - 13, playerY + 10);
-  ctx.lineTo(roadCenter(topY, frame, phase) - 50, topY);
-  ctx.lineTo(roadCenter(topY, frame, phase) + 50, topY);
-  ctx.lineTo(cx + 13, playerY + 10);
+  ctx.moveTo(cx - beamSpread, playerY + 10);
+  ctx.lineTo(roadCenter(topY, frame, phase) - 52, topY);
+  ctx.lineTo(roadCenter(topY, frame, phase) + 52, topY);
+  ctx.lineTo(cx + beamSpread, playerY + 10);
   ctx.closePath();
   const g = ctx.createLinearGradient(0, playerY, 0, topY);
   g.addColorStop(0, `rgba(255, 239, 190, ${0.03 * n})`);

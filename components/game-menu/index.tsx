@@ -5,13 +5,15 @@ import Image from "next/image";
 import { t } from "@/utils/localization";
 import { ACHIEVEMENTS_DATA } from "@/engine/constants";
 import { SOCIAL_LINKS } from "@/utils/config";
-import { JoystickPosition } from "@/utils/settings";
+import type { JoystickPosition, VehicleType } from "@/utils/settings";
 
 interface GameMenuProps {
   onStart: () => void;
   highScore: number;
   bestDeliveries: number;
   unlockedCount: number;
+  selectedVehicle: VehicleType;
+  onOpenVehicleSelect?: () => void;
   joystickPosition?: JoystickPosition;
   onChangeJoystickPosition?: (pos: JoystickPosition) => void;
   onOpenSettings?: () => void;
@@ -22,15 +24,17 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   highScore,
   bestDeliveries,
   unlockedCount,
+  selectedVehicle,
+  onOpenVehicleSelect,
   onOpenSettings,
 }) => {
   const totalBadges = Object.keys(ACHIEVEMENTS_DATA).length;
 
   return (
     <div className="absolute inset-0 z-40 flex flex-col justify-between p-6 pointer-events-auto select-none bg-gradient-to-b from-transparent via-black/25 to-black/85 transition-opacity duration-300">
-      {/* Üst Kısım: Logo, Rozet ve Ayarlar Butonu */}
-      <div className="pt-3 flex items-center justify-between">
-        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 border border-teal-500/30 backdrop-blur-md shadow-lg shadow-teal-500/10">
+      {/* Üst Kısım: Logo, Araç Seçimi ve Ayarlar Butonu */}
+      <div className="pt-3 flex items-center justify-between gap-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950/70 border border-teal-500/30 backdrop-blur-md shadow-lg shadow-teal-500/10">
           <div className="relative w-5 h-5 rounded-full overflow-hidden border border-teal-400/50">
             <Image
               src="/icon-192.png"
@@ -45,15 +49,30 @@ export const GameMenu: React.FC<GameMenuProps> = ({
           </span>
         </div>
 
-        {/* Ayarlar Butonu */}
-        <button
-          onClick={onOpenSettings}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/80 border border-slate-700/60 text-slate-300 hover:text-white text-[11px] font-black tracking-wider transition active:scale-95 shadow-md"
-          aria-label={t("settings.open_settings")}
-        >
-          <span>⚙️</span>
-          <span>{t("settings.open_settings")}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Araç Seçim Butonu */}
+          <button
+            onClick={onOpenVehicleSelect}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/80 border border-teal-500/40 text-teal-300 hover:text-white text-[11px] font-black tracking-wider transition active:scale-95 shadow-md"
+            aria-label={t("vehicles.select_vehicle")}
+          >
+            <span>{selectedVehicle === "car" ? "🚗" : "🛵"}</span>
+            <span className="hidden xs:inline">
+              {selectedVehicle === "car" ? t("vehicles.car.name") : t("vehicles.motor.name")}
+            </span>
+            <span className="text-[9px] text-teal-400">▼</span>
+          </button>
+
+          {/* Ayarlar Butonu */}
+          <button
+            onClick={onOpenSettings}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/80 border border-slate-700/60 text-slate-300 hover:text-white text-[11px] font-black tracking-wider transition active:scale-95 shadow-md"
+            aria-label={t("settings.open_settings")}
+          >
+            <span>⚙️</span>
+            <span className="hidden sm:inline">{t("settings.open_settings")}</span>
+          </button>
+        </div>
       </div>
 
       {/* Ana Başlık ve Başlat Alanı */}
@@ -81,15 +100,25 @@ export const GameMenu: React.FC<GameMenuProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={onStart}
-          className="group relative flex items-center justify-between w-full max-w-[280px] px-6 py-4 rounded-full bg-[#f4f4ef] text-slate-900 font-black text-sm tracking-wider shadow-xl hover:bg-white hover:scale-[1.02] active:scale-95 transition-all duration-150"
-        >
-          <span>{t("menu.start_shift")}</span>
-          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-950 text-white group-hover:translate-x-1 transition-transform">
-            →
-          </span>
-        </button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <button
+            onClick={onStart}
+            className="group relative flex items-center justify-between w-full max-w-[280px] px-6 py-4 rounded-full bg-[#f4f4ef] text-slate-900 font-black text-sm tracking-wider shadow-xl hover:bg-white hover:scale-[1.02] active:scale-95 transition-all duration-150"
+          >
+            <span>{t("menu.start_shift")}</span>
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-950 text-white group-hover:translate-x-1 transition-transform">
+              →
+            </span>
+          </button>
+
+          <button
+            onClick={onOpenVehicleSelect}
+            className="sm:hidden flex items-center justify-center gap-2 py-2 px-4 rounded-full bg-slate-900/80 border border-slate-700/70 text-slate-300 text-xs font-bold active:scale-95"
+          >
+            <span>{selectedVehicle === "car" ? "🚗" : "🛵"}</span>
+            <span>{selectedVehicle === "car" ? t("vehicles.car.name") : t("vehicles.motor.name")} ({t("vehicles.select_vehicle")})</span>
+          </button>
+        </div>
 
         {/* Kontrol Kılavuzu & İstatistikler */}
         <div className="pt-2 space-y-1.5 text-[11px] font-semibold text-slate-400">

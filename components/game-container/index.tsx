@@ -10,6 +10,7 @@ import { GamePause } from "@/components/game-pause";
 import { GameOver } from "@/components/game-over";
 import { ShareModal } from "@/components/share-modal";
 import { SettingsModal } from "@/components/settings-modal";
+import { VehicleSelectModal } from "@/components/vehicle-select-modal";
 import { PwaInstaller } from "@/components/pwa-installer";
 import { setSoundMuted } from "@/engine/audio";
 import {
@@ -19,8 +20,11 @@ import {
   setButtonSize as saveButtonSize,
   getSoundEnabled,
   setSoundEnabled as saveSoundEnabled,
+  getSelectedVehicle,
+  setSelectedVehicle as saveSelectedVehicle,
   JoystickPosition,
   ButtonSize,
+  VehicleType,
 } from "@/utils/settings";
 
 export const GameContainer: React.FC = () => {
@@ -28,6 +32,9 @@ export const GameContainer: React.FC = () => {
   const [gameState, setGameState] = useState<GameStateEnum>(GameStateEnum.MENU);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isVehicleSelectOpen, setIsVehicleSelectOpen] = useState(false);
+  const [isStartingFlow, setIsStartingFlow] = useState(false);
+  const [selectedVehicle, setSelectedVehicleState] = useState<VehicleType>(getSelectedVehicle);
   const [controlsLayout, setControlsLayout] = useState<JoystickPosition>(getJoystickPosition);
   const [buttonSize, setButtonSize] = useState<ButtonSize>(getButtonSize);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(getSoundEnabled);
@@ -54,7 +61,25 @@ export const GameContainer: React.FC = () => {
     setSoundMuted(!enabled);
   };
 
-  const handleStartShift = () => {
+  const handleVehicleChange = (vehicle: VehicleType) => {
+    setSelectedVehicleState(vehicle);
+    saveSelectedVehicle(vehicle);
+    engine.setVehicleType(vehicle);
+    setTick((t) => t + 1);
+  };
+
+  const handleOpenVehicleMenu = () => {
+    setIsStartingFlow(false);
+    setIsVehicleSelectOpen(true);
+  };
+
+  const handleStartShiftFlow = () => {
+    setIsStartingFlow(true);
+    setIsVehicleSelectOpen(true);
+  };
+
+  const handleProceedToGame = () => {
+    setIsStartingFlow(false);
     engine.resetGame();
   };
 
@@ -73,7 +98,7 @@ export const GameContainer: React.FC = () => {
 
   const handleRestart = () => {
     setIsShareOpen(false);
-    engine.resetGame();
+    handleStartShiftFlow();
   };
 
   return (
@@ -90,10 +115,12 @@ export const GameContainer: React.FC = () => {
         {/* UI Katmanları */}
         {gameState === GameStateEnum.MENU && (
           <GameMenu
-            onStart={handleStartShift}
+            onStart={handleStartShiftFlow}
             highScore={engine.highScore}
             bestDeliveries={engine.bestDeliveries}
             unlockedCount={engine.unlockedAchievements.size}
+            selectedVehicle={selectedVehicle}
+            onOpenVehicleSelect={handleOpenVehicleMenu}
             joystickPosition={controlsLayout}
             onChangeJoystickPosition={handleLayoutChange}
             onOpenSettings={() => setIsSettingsOpen(true)}
@@ -157,6 +184,16 @@ export const GameContainer: React.FC = () => {
         onChangeButtonSize={handleButtonSizeChange}
         soundEnabled={soundEnabled}
         onChangeSoundEnabled={handleSoundChange}
+      />
+
+      {/* Araç Seçim Modalı */}
+      <VehicleSelectModal
+        isOpen={isVehicleSelectOpen}
+        onClose={() => setIsVehicleSelectOpen(false)}
+        selectedVehicle={selectedVehicle}
+        onSelectVehicle={handleVehicleChange}
+        isStartingFlow={isStartingFlow}
+        onStartGame={handleProceedToGame}
       />
 
       {/* PWA Yükleme ve Çevrimdışı Bildirimi */}
