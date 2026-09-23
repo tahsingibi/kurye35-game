@@ -168,9 +168,9 @@ export class PoliceUnit {
     ctx.fillStyle = "#142330";
     roundRect(ctx, -16, -25, 32, 20, 5);
     ctx.fill();
-    ctx.fillStyle = "#285b86";
+    ctx.fillStyle = "#174b70";
     ctx.fillRect(-21, 3, 42, 14);
-    drawText(ctx, "POLİS", 0, 13, 5.7, 950, "#fff", "center");
+    drawText(ctx, "POLİS 35", 0, 13, 5.2, 950, "#fff", "center");
 
     if (!this.crashed) {
       const flashState = Math.floor(frame / 7) % 2;

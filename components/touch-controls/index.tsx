@@ -4,6 +4,7 @@ import React, { useRef, useCallback, useState, useEffect } from "react";
 import { GameEngine } from "@/engine/game-engine";
 import { t } from "@/utils/localization";
 import { JoystickPosition, ButtonSize } from "@/utils/settings";
+import { ArrowDownIcon, ArrowLeftIcon, ArrowRightIcon, ArrowUpIcon, BoltIcon } from "@/components/ui/icons";
 
 interface TouchControlsProps {
   engine: GameEngine;
@@ -83,12 +84,11 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   const sizeMap: Record<ButtonSize, {
     btnPx: number;
     nosPx: number;
-    textClass: string;
     labelClass: string;
   }> = {
-    small: { btnPx: 64, nosPx: 52, textClass: "text-2xl", labelClass: "text-[11px]" },
-    medium: { btnPx: 76, nosPx: 60, textClass: "text-3xl", labelClass: "text-[12px]" },
-    large: { btnPx: 90, nosPx: 70, textClass: "text-4xl", labelClass: "text-[13px]" },
+    small: { btnPx: 58, nosPx: 48, labelClass: "text-[10px]" },
+    medium: { btnPx: 68, nosPx: 56, labelClass: "text-[11px]" },
+    large: { btnPx: 80, nosPx: 64, labelClass: "text-[12px]" },
   };
 
   const currentSize = sizeMap[buttonSize] || sizeMap.medium;
@@ -107,8 +107,8 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
       style={nosStyle}
       className={`relative rounded-full flex flex-col items-center justify-center select-none touch-none transition-all active:scale-90 active:brightness-125 pointer-events-auto ${
         nosAvailable
-          ? "bg-slate-950/90 shadow-lg shadow-sky-500/25 border border-sky-400/60"
-          : "bg-slate-950/80 border border-slate-700/60 opacity-80"
+          ? "bg-[#071116]/90 shadow-[0_0_28px_rgba(56,189,248,.22)] border border-sky-300/60 backdrop-blur-xl"
+          : "bg-[#071116]/80 border border-white/10 opacity-75 backdrop-blur-xl"
       }`}
       aria-label="NOS Göstergesi ve Butonu"
     >
@@ -117,7 +117,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
           cx={currentSize.nosPx / 2}
           cy={currentSize.nosPx / 2}
           r={radius}
-          stroke="rgba(255,255,255,0.12)"
+          stroke="rgba(255,255,255,0.10)"
           strokeWidth="3.5"
           fill="none"
         />
@@ -134,8 +134,9 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
           className="transition-all duration-100"
         />
       </svg>
-      <span className="text-[10px] font-black leading-none text-sky-300">
-        {isBoosting ? "BOOST" : "⚡ NOS"}
+      <span className="flex items-center gap-0.5 text-[10px] font-black leading-none text-sky-300">
+        {!isBoosting && <BoltIcon className="h-2.5 w-2.5" />}
+        {isBoosting ? "BOOST" : "NOS"}
       </span>
       <span className="text-[11px] font-black leading-none text-white mt-0.5">
         {nosPercent}%
@@ -144,7 +145,7 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   );
 
   const SteerGroup = (
-    <div className="flex flex-col items-center gap-2 pointer-events-auto shrink-0">
+    <div className="flex flex-col items-center gap-2.5 pointer-events-auto shrink-0">
       {NosButton}
       <div className="flex items-center gap-2 sm:gap-3">
         <button
@@ -153,10 +154,10 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
           onPointerLeave={stopSteer}
           onPointerCancel={stopSteer}
           style={btnStyle}
-          className="rounded-3xl bg-slate-900/90 border-2 border-teal-500/60 active:border-teal-300 active:bg-teal-500/30 active:scale-90 active:brightness-125 text-teal-300 active:text-white font-black shadow-2xl shadow-black/80 flex items-center justify-center select-none touch-none transition-all duration-75"
+          className="rounded-[26px] bg-[#071116]/88 border border-teal-300/45 active:border-teal-200 active:bg-teal-300/25 active:scale-90 text-teal-200 active:text-white font-black shadow-[0_14px_30px_rgba(0,0,0,.48),inset_0_1px_rgba(255,255,255,.08)] backdrop-blur-xl flex items-center justify-center select-none touch-none transition-all duration-75"
           aria-label="Sol"
         >
-          <span className={currentSize.textClass}>←</span>
+          <ArrowLeftIcon className="h-[42%] w-[42%]" />
         </button>
         <button
           onPointerDown={(e) => { e.preventDefault(); startSteer("right"); }}
@@ -164,10 +165,10 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
           onPointerLeave={stopSteer}
           onPointerCancel={stopSteer}
           style={btnStyle}
-          className="rounded-3xl bg-slate-900/90 border-2 border-teal-500/60 active:border-teal-300 active:bg-teal-500/30 active:scale-90 active:brightness-125 text-teal-300 active:text-white font-black shadow-2xl shadow-black/80 flex items-center justify-center select-none touch-none transition-all duration-75"
+          className="rounded-[26px] bg-[#071116]/88 border border-teal-300/45 active:border-teal-200 active:bg-teal-300/25 active:scale-90 text-teal-200 active:text-white font-black shadow-[0_14px_30px_rgba(0,0,0,.48),inset_0_1px_rgba(255,255,255,.08)] backdrop-blur-xl flex items-center justify-center select-none touch-none transition-all duration-75"
           aria-label="Sağ"
         >
-          <span className={currentSize.textClass}>→</span>
+          <ArrowRightIcon className="h-[42%] w-[42%]" />
         </button>
       </div>
     </div>
@@ -182,10 +183,10 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
         onPointerLeave={handleBrakeEnd}
         onPointerCancel={handleBrakeEnd}
         style={btnStyle}
-        className="rounded-3xl bg-rose-950/90 border-2 border-rose-500/70 active:bg-rose-500/40 active:border-rose-300 active:scale-90 active:brightness-125 text-rose-200 active:text-white font-black shadow-2xl shadow-black/80 flex flex-col items-center justify-center select-none touch-none transition-all duration-75"
+        className="rounded-[26px] bg-[#1a0b0d]/88 border border-rose-400/55 active:bg-rose-400/35 active:border-rose-200 active:scale-90 text-rose-200 active:text-white font-black shadow-[0_14px_30px_rgba(0,0,0,.48),inset_0_1px_rgba(255,255,255,.07)] backdrop-blur-xl flex flex-col items-center justify-center select-none touch-none transition-all duration-75"
         aria-label="Fren"
       >
-        <span className="text-xl sm:text-2xl leading-none">▼</span>
+        <ArrowDownIcon className="h-[28%] w-[28%]" />
         <span className={`${currentSize.labelClass} tracking-wider mt-1 font-black`}>{t("hud.touch_brake")}</span>
       </button>
 
@@ -196,17 +197,17 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
         onPointerLeave={handleThrottleEnd}
         onPointerCancel={handleThrottleEnd}
         style={btnStyle}
-        className="rounded-3xl bg-emerald-950/90 border-2 border-emerald-400/80 active:bg-emerald-400/40 active:border-emerald-200 active:scale-90 active:brightness-125 text-emerald-200 active:text-white font-black shadow-2xl shadow-black/80 flex flex-col items-center justify-center select-none touch-none transition-all duration-75"
+        className="rounded-[26px] bg-[#07150f]/90 border border-emerald-300/65 active:bg-emerald-300/35 active:border-emerald-100 active:scale-90 text-emerald-100 active:text-white font-black shadow-[0_14px_30px_rgba(0,0,0,.48),0_0_24px_rgba(52,211,153,.10),inset_0_1px_rgba(255,255,255,.08)] backdrop-blur-xl flex flex-col items-center justify-center select-none touch-none transition-all duration-75"
         aria-label="Gaz"
       >
-        <span className="text-2xl sm:text-3xl leading-none">▲</span>
+        <ArrowUpIcon className="h-[30%] w-[30%]" />
         <span className={`${currentSize.labelClass} tracking-wider mt-1 font-black`}>{t("hud.touch_throttle")}</span>
       </button>
     </div>
   );
 
   return (
-    <div className="fixed bottom-4 md:bottom-7 left-0 right-0 px-4 sm:px-6 pointer-events-none z-30 flex items-end justify-between max-w-lg mx-auto select-none">
+    <div className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-0 right-0 px-3 sm:px-6 pointer-events-none z-30 flex items-end justify-between max-w-[42rem] mx-auto select-none">
       {isLeftLayout ? (
         <>
           {SteerGroup}

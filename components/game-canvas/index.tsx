@@ -8,6 +8,7 @@ import { renderGameView, renderBackground } from "@/engine/game-renderer";
 import { GameStateEnum } from "@/engine/types";
 import { TouchControls } from "@/components/touch-controls";
 import { JoystickPosition, ButtonSize } from "@/utils/settings";
+import { PauseIcon } from "@/components/ui/icons";
 
 interface GameCanvasProps {
   engine: GameEngine;
@@ -48,19 +49,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const handleResize = () => {
       const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-      const ratio = VW / VH;
-      const ww = window.innerWidth;
-      const wh = window.innerHeight;
-      let w: number;
-      let h: number;
-
-      if (ww / wh < ratio) {
-        w = ww;
-        h = w / ratio;
-      } else {
-        h = Math.min(wh, 920);
-        w = h * ratio;
-      }
+      const scale = Math.min(window.innerWidth / VW, window.innerHeight / VH);
+      const w = VW * scale;
+      const h = VH * scale;
 
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
@@ -83,9 +74,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (isTouchDev) inputMgr.joystickMode = true;
 
     const onVisibilityChange = () => {
-      if (document.hidden) engine.togglePause();
+      if (document.hidden) engine.pause();
     };
-    const onBlur = () => engine.togglePause();
+    const onBlur = () => engine.pause();
 
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("blur", onBlur);
@@ -116,8 +107,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
       const currentWidth = parseFloat(canvas.style.width) || VW;
-      const viewScale = currentWidth / VW;
-      const s = viewScale * dpr;
+      const s = (currentWidth / VW) * dpr;
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -155,7 +145,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     <>
       <canvas
         ref={canvasRef}
-        className="block shadow-[0_34px_120px_rgba(0,0,0,0.85)] rounded-lg overflow-hidden"
+        className="absolute inset-0 block w-full h-full"
       />
       <TouchControls
         engine={engine}
@@ -166,10 +156,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       {isPlaying && (
         <button
           onClick={() => engine.togglePause()}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-12 h-12 rounded-2xl bg-slate-900/85 border border-slate-600/70 hover:bg-slate-800 active:scale-90 active:bg-slate-700 text-slate-100 flex items-center justify-center font-black text-lg shadow-xl shadow-black/60 pointer-events-auto z-30 transition-transform select-none"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 rounded-2xl bg-[#071116]/85 border border-white/15 hover:border-teal-300/50 active:scale-90 active:bg-teal-300/15 text-slate-100 backdrop-blur-xl flex items-center justify-center font-black text-sm shadow-xl shadow-black/50 pointer-events-auto z-30 transition-all select-none"
           aria-label="Duraklat"
         >
-          <span className="leading-none">Ⅱ</span>
+          <PauseIcon className="h-5 w-5" />
         </button>
       )}
     </>

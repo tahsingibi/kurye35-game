@@ -134,7 +134,7 @@ export function drawBus(ctx: CanvasRenderingContext2D): void {
   ctx.fill();
   ctx.fillStyle = "#d43c36";
   ctx.fillRect(-28, 8, 56, 11);
-  drawText(ctx, "İETT", 0, 17, 6.5, 950, "#fff", "center");
+  drawText(ctx, "ESHOT", 0, 17, 6.2, 950, "#fff", "center");
   rearLights(ctx, w, 31);
   plate(ctx, 38, 20);
 }
@@ -172,18 +172,22 @@ export function drawPuddle(ctx: CanvasRenderingContext2D): void {
 }
 
 export function drawParcel(ctx: CanvasRenderingContext2D, frame: number): void {
-  ctx.fillStyle = "rgba(255,174,64,.16)";
+  const pulse = 0.65 + Math.sin(frame * 0.09) * 0.2;
+  ctx.fillStyle = `rgba(255,199,102,${0.12 + pulse * 0.08})`;
   ctx.beginPath();
   ctx.arc(0, 0, 31, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "rgba(255,192,89,.55)";
+  ctx.strokeStyle = `rgba(255,210,120,${0.46 + pulse * 0.25})`;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(0, 0, 25 + Math.sin(frame * 0.09) * 2, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.fillStyle = "#d97824";
+  ctx.shadowBlur = 16;
+  ctx.shadowColor = "rgba(255,170,60,.5)";
+  ctx.fillStyle = "#d97724";
   roundRect(ctx, -16, -16, 32, 31, 6);
   ctx.fill();
+  ctx.shadowBlur = 0;
   ctx.fillStyle = "#f4b35f";
   ctx.fillRect(-3, -16, 6, 31);
   ctx.fillRect(-16, -3, 32, 6);

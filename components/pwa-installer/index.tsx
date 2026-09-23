@@ -35,7 +35,7 @@ export const PwaInstaller: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 flex items-center justify-between p-4 rounded-xl bg-slate-900/90 border border-slate-700/50 backdrop-blur-md shadow-2xl text-white max-w-sm mx-auto">
+    <div className="ui-panel fixed bottom-4 left-4 right-4 z-50 flex items-center justify-between p-4 rounded-2xl text-white max-w-sm mx-auto">
       <div className="flex flex-col">
         <span className="font-bold text-sm tracking-wide text-cyan-400">
           {t("app.title")}
@@ -47,7 +47,7 @@ export const PwaInstaller: React.FC = () => {
       <div className="flex items-center space-x-2">
         <button
           onClick={handleInstall}
-          className="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-bold text-xs rounded-lg transition active:scale-95"
+          className="ui-primary px-3 py-2 text-slate-950 font-bold text-xs rounded-xl transition active:scale-95"
         >
           {t("pwa.install_btn")}
         </button>

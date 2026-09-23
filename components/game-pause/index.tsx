@@ -3,6 +3,7 @@
 import React from "react";
 import { t } from "@/utils/localization";
 import { JoystickPosition } from "@/utils/settings";
+import { CloseIcon, PlayIcon } from "@/components/ui/icons";
 
 interface GamePauseProps {
   onResume: () => void;
@@ -22,43 +23,48 @@ export const GamePause: React.FC<GamePauseProps> = ({
   onOpenSettings,
 }) => {
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center p-6 pointer-events-auto select-none bg-slate-950/75 backdrop-blur-md">
-      <div className="w-full max-w-sm p-6 rounded-3xl bg-slate-900/90 border border-slate-700/60 shadow-2xl space-y-4 text-left">
+    <div className="ui-modal-backdrop absolute inset-0 z-40 flex items-center justify-center p-5 pointer-events-auto select-none">
+      <div className="ui-panel ui-rise w-full rounded-[28px] p-5 text-left">
         <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-950/80 border border-teal-500/40 text-teal-300 text-[11px] font-black uppercase tracking-wider">
-            {t("pause.badge")}
-          </div>
-          {onOpenSettings && (
-            <button
-              onClick={onOpenSettings}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black transition active:scale-95 border border-slate-600/50"
-            >
-              <span>⚙️</span>
-              <span>{t("settings.open_settings")}</span>
-            </button>
-          )}
+          <div className="ui-kicker">{t("pause.badge")}</div>
+          <button
+            onClick={onResume}
+            className="ui-icon-button active:scale-95"
+            aria-label="Kapat ve oyuna dön"
+          >
+            <CloseIcon className="h-4 w-4" />
+          </button>
         </div>
 
-        <div>
-          <h2 className="text-3xl font-black text-slate-100 tracking-tight">
+        <div className="my-6">
+          <h2 className="text-4xl font-black tracking-[-.04em] text-white">
             {t("pause.title")}
           </h2>
-          <p className="mt-1 text-xs font-bold text-slate-400">
-            {clockText} · {phaseText} · {speed} km/h
-          </p>
+          <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+            {[["SAAT", clockText], ["EVRE", phaseText], ["HIZ", `${speed}`]].map(([label, value], i) => <div key={label} className={`px-3 py-3 ${i ? "border-l border-white/10" : ""}`}><div className="text-[8px] font-black tracking-widest text-slate-500">{label}</div><div className="mt-1 text-sm font-black text-white">{value}</div></div>)}
+          </div>
         </div>
 
         <button
           onClick={onResume}
-          className="group flex items-center justify-between w-full px-6 py-4 rounded-full bg-[#f2f3ef] text-slate-900 font-black text-sm tracking-wider shadow-lg hover:bg-white active:scale-95 transition-all"
+          className="ui-primary group flex w-full items-center justify-between rounded-2xl px-5 py-4 text-sm font-black tracking-wider transition-all"
         >
           <span>{t("pause.resume")}</span>
-          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-slate-950 text-white group-hover:scale-105 transition-transform">
-            ▶
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#07100f] text-white transition-transform group-hover:scale-105">
+            <PlayIcon className="h-4 w-4" />
           </span>
         </button>
 
-        <div className="space-y-1 pt-1 text-[11px] font-medium text-slate-500">
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="ui-secondary mt-2.5 w-full rounded-2xl px-5 py-3 text-xs font-black tracking-wider transition active:scale-[.98]"
+          >
+            {t("settings.open_settings")}
+          </button>
+        )}
+
+        <div className="mt-4 flex items-center justify-between text-[9px] font-bold text-slate-600">
           <div>{t("pause.shortcut")}</div>
           <div>{t("pause.controls")}</div>
         </div>

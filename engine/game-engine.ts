@@ -1,16 +1,18 @@
 import { VW, VH, HORIZON, FIXED_STEP, MISSIONS_DATA, ACHIEVEMENTS_DATA } from "./constants";
-import { clamp, getHour, daylight, laneCenter } from "./utils";
+import { clamp, getHour, daylight, laneCenter, nightLevel } from "./utils";
 import { Player } from "./entities/player";
 import { TrafficItem } from "./entities/traffic";
 import { PoliceUnit } from "./entities/police";
-import { playSound } from "./audio";
+import { playSound, startEngineSound, updateEngineSound, stopEngineSound } from "./audio";
 import { checkAABBHit, handlePoliceTrafficCollisions } from "./collision";
 import { getRoutePhase, getMissionProgressText, loadStoredAchievements, saveAchievements, loadScores, saveScores } from "./missions";
 import { t } from "@/utils/localization";
+import { getSelectedVehicle, type VehicleType } from "@/utils/settings";
 import type { GameStateEnum, Particle, Floater, BannerInfo, AchievementToast, ControlsState } from "./types";
 
 export class GameEngine {
   state: GameStateEnum = 0; // MENU
+  vehicleType: VehicleType = "motor";
   score = 0;
   deliveries = 0;
   health = 100;
@@ -32,6 +34,7 @@ export class GameEngine {
   chaseWasActive = false;
   policeCooldown = 0;
   sirenCooldown = 0;
+  pursuitCameraAmount = 0;
 
   violations = 0;
   lastViolation = "Yok";
@@ -81,11 +84,11 @@ export class GameEngine {
     if (!this._isTouchDevice) {
       this.player.y = 633;
     } else if (this._buttonSize === "large") {
-      this.player.y = 530;
+      this.player.y = 520;
     } else if (this._buttonSize === "medium") {
-      this.player.y = 550;
+      this.player.y = 540;
     } else {
-      this.player.y = 570;
+      this.player.y = 560;
     }
   }
   controls: ControlsState = { throttle: false, brake: false };
@@ -106,6 +109,13 @@ export class GameEngine {
     this.highScore = scores.highScore;
     this.bestDeliveries = scores.bestDeliveries;
     this.unlockedAchievements = loadStoredAchievements();
+    const savedVehicle = getSelectedVehicle();
+    this.setVehicleType(savedVehicle);
+  }
+
+  setVehicleType(type: VehicleType): void {
+    this.vehicleType = type;
+    this.player.setVehicleType(type);
   }
 
   get routePhase(): number {
@@ -222,14 +232,14 @@ export class GameEngine {
     this.nos -= 30;
     this.registerViolation(11, "Aşırı hız / NOS");
     playSound("nos");
-    this.addParticle(this.player.x + 24, this.player.y + 84, 22, "#6edbff");
+    this.addParticle(this.player.x + this.player.w / 2, this.player.y + this.player.h, 22, "#6edbff");
   }
 
   moveLeft(): void {
     if (this.state !== 2 || this.player.laneLock > 0) return;
     if (this.player.lane > 0) {
       this.player.lane--;
-      this.player.laneLock = 4;
+      this.player.laneLock = this.vehicleType === "car" ? 5 : 4;
       playSound("move");
     }
   }
@@ -238,7 +248,7 @@ export class GameEngine {
     if (this.state !== 2 || this.player.laneLock > 0) return;
     if (this.player.lane < 2) {
       this.player.lane++;
-      this.player.laneLock = 4;
+      this.player.laneLock = this.vehicleType === "car" ? 5 : 4;
       playSound("move");
     }
   }
@@ -290,21 +300,28 @@ export class GameEngine {
 
   damage(item: TrafficItem): void {
     if (this.player.invuln > 0) return;
-    const d = item.type === "bus" ? 46 : item.type === "works" ? 35 : item.type === "van" ? 31 : item.type === "puddle" ? 14 : 27;
+    let d = item.type === "bus" ? 46 : item.type === "works" ? 35 : item.type === "van" ? 31 : item.type === "puddle" ? 14 : 27;
+
+    // Otomobil dayanıklılık mekaniği: Motorlara kıyasla %50 daha dayanıklı!
+    if (this.vehicleType === "car") {
+      d = item.type === "puddle" ? Math.round(d * 0.4) : Math.round(d * 0.5);
+    }
+
     this.health = Math.max(0, this.health - d);
-    this.player.invuln = 58;
-    this.shake = 18;
+    this.player.invuln = this.vehicleType === "car" ? 64 : 58;
+    this.shake = this.vehicleType === "car" ? 14 : 18;
     this.flash = 12;
     this.combo = 0;
     this.comboFrames = 0;
     this.registerViolation(item.type === "puddle" ? 5 : 24, item.type === "puddle" ? "Kontrol kaybı" : "Trafik kazası");
     playSound("hit");
-    this.addParticle(this.player.x + 24, this.player.y + 45, 26, "#ff754f");
-    this.addFloater(item.type === "puddle" ? "Kaydın!" : `-${d}%`, this.player.x + 24, this.player.y - 12, "#ff9c8e");
+    this.addParticle(this.player.x + this.player.w / 2, this.player.y + 45, 26, "#ff754f");
+    this.addFloater(item.type === "puddle" ? "Kaydın!" : `-${d}%`, this.player.x + this.player.w / 2, this.player.y - 12, "#ff9c8e");
     if (this.health <= 0) this.endGame("crash");
   }
 
   endGame(reason: "crash" | "busted"): void {
+    stopEngineSound();
     this.endReason = reason;
     saveScores(this.score, this.deliveries);
     const sc = loadScores();
@@ -315,6 +332,7 @@ export class GameEngine {
   }
 
   resetGame(): void {
+    stopEngineSound();
     this.score = 0;
     this.deliveries = 0;
     this.health = 100;
@@ -337,6 +355,7 @@ export class GameEngine {
     this.chaseWasActive = false;
     this.policeCooldown = 0;
     this.sirenCooldown = 0;
+    this.pursuitCameraAmount = 0;
     this.violations = 0;
     this.lastViolation = "Yok";
     this.cleanMissionFrames = 0;
@@ -363,6 +382,7 @@ export class GameEngine {
     this.particles = [];
     this.floaters = [];
     this.updatePlayerY();
+    this.player.setVehicleType(this.vehicleType);
     this.player.lane = 1;
     this.player.x = laneCenter(1, this.player.y, 0, 0) - this.player.w / 2;
     this.player.invuln = 0;
@@ -377,19 +397,27 @@ export class GameEngine {
     this.controls.brake = false;
     this.startMission(0);
     this.setBanner(t("time_banners.contact_title"), t("time_banners.contact_sub"), "VARDİYA", "#8de8da", 210);
+    startEngineSound(this.vehicleType);
     this.onStateChange?.(this.state);
   }
 
   togglePause(): void {
     if (this.state === 2) {
-      this.state = 4; // PAUSED
-      this.controls.throttle = false;
-      this.controls.brake = false;
-      this.onStateChange?.(this.state);
+      this.pause();
     } else if (this.state === 4) {
+      startEngineSound(this.vehicleType);
       this.state = 2; // PLAYING
       this.onStateChange?.(this.state);
     }
+  }
+
+  pause(): void {
+    if (this.state !== 2) return;
+    stopEngineSound();
+    this.state = 4; // PAUSED
+    this.controls.throttle = false;
+    this.controls.brake = false;
+    this.onStateChange?.(this.state);
   }
 
   update(): void {
@@ -418,7 +446,8 @@ export class GameEngine {
       this.baseSpeed -= 0.095 + (this.baseSpeed > 6 ? 0.02 : 0);
     } else if (this.controls.throttle) {
       const ratio = clamp(this.baseSpeed / maxRoadSpeed, 0, 1);
-      this.baseSpeed += Math.max(0.027, 0.052 - 0.022 * ratio * ratio);
+      const accelRate = this.vehicleType === "car" ? 0.046 : 0.052;
+      this.baseSpeed += Math.max(0.027, accelRate - 0.022 * ratio * ratio);
     } else if (this.baseSpeed > idleSpeed) {
       this.baseSpeed -= 0.016;
     } else if (this.baseSpeed < idleSpeed) {
@@ -432,6 +461,17 @@ export class GameEngine {
     this.score += (this.baseSpeed / 8.8) * (this.boosting ? 0.13 : 0.06);
 
     this.player.update(this.rain, this.frame, this.routePhase);
+
+    // Dinamik Araç Motor Sesi & Ortam Ambiyansı Güncellemesi
+    updateEngineSound(
+      this.baseSpeed,
+      this.controls.throttle,
+      this.controls.brake,
+      this.boosting,
+      this.vehicleType,
+      this.rain,
+      nightLevel(this.gameMinutes)
+    );
 
     // NOS
     if (this.boosting) {
@@ -564,7 +604,7 @@ export class GameEngine {
           this.comboFrames = 150;
           playSound("pickup");
           this.addParticle(it.x + it.w / 2, it.y + it.h / 2, 18, "#ffd070");
-          this.addFloater(`Teslimat +${150 * mRatio}`, this.player.x + 24, this.player.y - 18, "#ffe1a8");
+          this.addFloater(`Teslimat +${150 * mRatio}`, this.player.x + this.player.w / 2, this.player.y - 18, "#ffe1a8");
           this.items.splice(i, 1);
           this.onDelivery();
           if (this.deliveries === 1) this.unlockAchievement("first");
@@ -583,7 +623,7 @@ export class GameEngine {
           this.score += 30;
           this.nos = Math.min(100, this.nos + 2);
           this.registerViolation(4, "Tehlikeli yakın geçiş");
-          this.addFloater("Yakın geçiş", this.player.x + 24, this.player.y + 20, "#ffd683");
+          this.addFloater("Yakın geçiş", this.player.x + this.player.w / 2, this.player.y + 20, "#ffd683");
         }
       }
     }
@@ -592,15 +632,19 @@ export class GameEngine {
     for (const p of this.police) {
       if (p.retiring || p.crashed) continue;
       if (this.player.invuln <= 0 && checkAABBHit(this.player, p, 8, 5)) {
-        this.health = Math.max(0, this.health - 25);
-        this.player.invuln = 60;
-        this.shake = 20;
+        // Otomobil dayanıklılığı: Araba polisle çarpışınca çok daha az can kaybeder ve darbeyi emer
+        const policeDamage = this.vehicleType === "car" ? 12 : 25;
+        const arrestRise = this.vehicleType === "car" ? 18 : 32;
+
+        this.health = Math.max(0, this.health - policeDamage);
+        this.player.invuln = this.vehicleType === "car" ? 68 : 60;
+        this.shake = this.vehicleType === "car" ? 15 : 20;
         this.flash = 14;
-        this.arrest = clamp(this.arrest + 32, 0, 100);
+        this.arrest = clamp(this.arrest + arrestRise, 0, 100);
         this.registerViolation(30, "Polis aracına çarpma");
         playSound("hit");
-        this.addParticle(this.player.x + 24, this.player.y + 40, 25, "#73b7ff");
-        this.addFloater("POLİSE ÇARPTIN", this.player.x + 24, this.player.y - 18, "#8dc4ff");
+        this.addParticle(this.player.x + this.player.w / 2, this.player.y + 40, 25, "#73b7ff");
+        this.addFloater("POLİSE ÇARPTIN", this.player.x + this.player.w / 2, this.player.y - 18, "#8dc4ff");
         if (this.health <= 0) this.endGame("crash");
         if (this.arrest >= 100) this.endGame("busted");
       }

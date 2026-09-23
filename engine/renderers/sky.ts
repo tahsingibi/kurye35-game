@@ -7,14 +7,14 @@ export function drawSky(ctx: CanvasRenderingContext2D, gameMinutes: number, fram
   const night = nightLevel(gameMinutes);
 
   // Gökyüzü renk geçişleri (Gündüz, Alacakaranlık, Gece)
-  let top = mixColor("#040711", "#4b9cdb", day);
-  let mid = mixColor("#0c1926", "#8ec4e8", day);
-  let low = mixColor("#1b2a36", "#d9cbaf", day);
+  let top = mixColor("#03070d", "#287fb5", day);
+  let mid = mixColor("#081923", "#74b7d2", day);
+  let low = mixColor("#162b32", "#d8c7a2", day);
 
   if (tw > 0.02) {
-    top = mixColor(top, "#341f3d", tw * 0.75);
-    mid = mixColor(mid, "#c25f54", tw * 0.8);
-    low = mixColor(low, "#f2a868", tw * 0.9);
+    top = mixColor(top, "#241a38", tw * 0.78);
+    mid = mixColor(mid, "#a94e56", tw * 0.82);
+    low = mixColor(low, "#f2a45c", tw * 0.92);
   }
 
   // Gökyüzü gradyanı tüm arka planı kaplar ve ufukla kusursuz bütünleşir

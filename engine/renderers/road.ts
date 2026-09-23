@@ -51,9 +51,9 @@ export function drawRoad(
   ctx.closePath();
 
   const rg = ctx.createLinearGradient(0, HORIZON, 0, VH);
-  rg.addColorStop(0, mixColor("#2c3238", "#53595f", day * 0.55));
-  rg.addColorStop(0.35, mixColor("#1e2327", "#44494e", day * 0.48));
-  rg.addColorStop(1, mixColor("#121518", "#2d3135", day * 0.42));
+  rg.addColorStop(0, mixColor("#202b31", "#505b60", day * 0.55));
+  rg.addColorStop(0.35, mixColor("#151e23", "#3b464a", day * 0.48));
+  rg.addColorStop(1, mixColor("#091014", "#252e31", day * 0.42));
   ctx.fillStyle = rg;
   ctx.fill();
 
@@ -106,7 +106,7 @@ export function drawRoad(
       const ratio = divider === 0.5 ? -0.27 : 0.27;
       const x = cx1 + half1 * ratio;
       const x2 = cx2 + half2 * ratio;
-      ctx.strokeStyle = `rgba(236,238,230,${0.1 + t * 0.6})`;
+      ctx.strokeStyle = `rgba(220,242,237,${0.1 + t * 0.62})`;
       ctx.lineWidth = lerp(1, 4.2, t);
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -130,7 +130,7 @@ export function drawRoad(
     const t = roadT(y);
     for (const side of [-1, 1]) {
       const x = roadCenter(y, frame, phase) + side * roadHalf(y) * 0.92;
-      ctx.fillStyle = side === -1 ? "rgba(255,205,95,.65)" : "rgba(255,255,255,.55)";
+      ctx.fillStyle = side === -1 ? "rgba(255,199,102,.72)" : "rgba(93,230,207,.64)";
       ctx.beginPath();
       ctx.arc(x, y, 1 + t * 2.2, 0, Math.PI * 2);
       ctx.fill();

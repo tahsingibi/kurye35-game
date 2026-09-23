@@ -20,6 +20,31 @@
     "author_twitter": "@tahsingibi",
     "author_site": "sungur.dev"
   },
+  "vehicles": {
+    "select_title": "ARAÇ SEÇİMİ",
+    "select_subtitle": "Vardiyaya çıkacağın aracı belirle.",
+    "select_vehicle": "Araç Seçimi",
+    "motor": {
+      "name": "Kurye Motoru",
+      "tag": "Çevik & Seri",
+      "desc": "Kıvrak ve dar yapısıyla trafikte aralardan akıp gitmek için idealdir. Ancak darbelere ve kazalara karşı daha hassastır."
+    },
+    "car": {
+      "name": "Kurye Arabası",
+      "tag": "Dayanıklı & Güvenli",
+      "desc": "Sağlam gövdesiyle darbelere %50 daha dayanıklıdır ve polisle temaslarda yüksek koruma sağlar. Şeritlerde daha geniştir."
+    },
+    "stats": {
+      "agility": "Manevra",
+      "speed": "İvmelenme",
+      "durability": "Dayanıklılık"
+    },
+    "preview_sound": "Sesi Dinle",
+    "selected": "SEÇİLDİ",
+    "select": "BU ARACI SEÇ",
+    "start_shift": "VARDİYAYI BAŞLAT",
+    "continue_with_current": "SEÇİLİ ARAÇLA BAŞLA"
+  },
   "story": {
     "badge": "DISPATCH",
     "center_title": "MERKEZ",
@@ -32,7 +57,7 @@
     "page_1_line_2": "Vardiya ilerledikçe geceye, sonra sabaha dönecek.",
     "page_2_tag": "17:15 · MERKEZ",
     "page_2_title": "Önce ritmi bul.",
-    "page_2_line_1": "Motor düşük hızla başlar ve kademeli hızlanır.",
+    "page_2_line_1": "Araç düşük hızla başlar ve kademeli hızlanır.",
     "page_2_line_2": "Kaza veya tekrarlanan tehlikeli sürüş polisi çağırır.",
     "page_3_tag": "17:18 · KONTAK",
     "page_3_title": "Teslimatlar bekliyor.",
@@ -76,6 +101,12 @@
     "size_medium": "Orta",
     "size_large": "Büyük",
     "sound_effects": "Ses Efektleri",
+    "audio_mixer": "Ses Mikseri",
+    "audio_mixer_desc": "Oyun seslerini ayrı ayrı yönet.",
+    "master_sound": "Ana Ses",
+    "vehicle_sounds": "Araç Sesleri",
+    "ambient_sounds": "Ortam Sesleri",
+    "effect_sounds": "Oyun Efektleri",
     "sound_on": "Açık",
     "sound_off": "Kapalı",
     "open_settings": "Ayarlar",
@@ -87,7 +118,7 @@
     "busted_title": "YAKALANDIN",
     "crash_title": "VARDİYA BİTTİ",
     "busted_desc": "Polis rotanı kesti.",
-    "crash_desc": "Motor devam edemeyecek durumda.",
+    "crash_desc": "Araç devam edemeyecek durumda.",
     "score": "SKOR",
     "deliveries": "TESLİMAT",
     "violations": "İHLAL",
