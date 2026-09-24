@@ -1,6 +1,7 @@
 import { VW, VH, HORIZON } from "../constants";
 import { clamp, lerp, nightLevel, roadCenter, roadHalf, drawText, roundRect } from "../utils";
 import type { Particle, Floater, BannerInfo, AchievementToast } from "../types";
+import type { RenderQuality } from "../performance";
 
 export function drawParticles(ctx: CanvasRenderingContext2D, particles: Particle[]): void {
   for (const p of particles) {
@@ -57,15 +58,24 @@ export function drawTimeAtmosphere(ctx: CanvasRenderingContext2D, gameMinutes: n
   }
 }
 
-export function drawCockpitGrade(ctx: CanvasRenderingContext2D): void {
+export function drawCockpitGrade(ctx: CanvasRenderingContext2D, quality: RenderQuality = "high"): void {
   ctx.save();
 
-  const vignette = ctx.createRadialGradient(VW / 2, VH * 0.46, 130, VW / 2, VH * 0.48, 470);
-  vignette.addColorStop(0, "rgba(0,0,0,0)");
-  vignette.addColorStop(0.7, "rgba(0,0,0,.03)");
-  vignette.addColorStop(1, "rgba(0,5,8,.32)");
-  ctx.fillStyle = vignette;
+  if (quality === "low") {
+    ctx.fillStyle = "rgba(0,5,8,.08)";
+  } else {
+    const vignette = ctx.createRadialGradient(VW / 2, VH * 0.46, 130, VW / 2, VH * 0.48, 470);
+    vignette.addColorStop(0, "rgba(0,0,0,0)");
+    vignette.addColorStop(0.7, "rgba(0,0,0,.03)");
+    vignette.addColorStop(1, "rgba(0,5,8,.32)");
+    ctx.fillStyle = vignette;
+  }
   ctx.fillRect(0, 0, VW, VH);
+
+  if (quality === "low") {
+    ctx.restore();
+    return;
+  }
 
   const lowerGrade = ctx.createLinearGradient(0, VH * 0.45, 0, VH);
   lowerGrade.addColorStop(0, "rgba(8,22,26,0)");
@@ -75,22 +85,28 @@ export function drawCockpitGrade(ctx: CanvasRenderingContext2D): void {
 
   ctx.globalAlpha = 0.035;
   ctx.fillStyle = "#d8fff8";
-  for (let y = 2; y < VH; y += 5) ctx.fillRect(0, y, VW, 0.55);
+  for (let y = 2; y < VH; y += quality === "medium" ? 8 : 5) ctx.fillRect(0, y, VW, 0.55);
   ctx.restore();
 }
 
-export function drawRain(ctx: CanvasRenderingContext2D, rain: number, frame: number): void {
+export function drawRain(
+  ctx: CanvasRenderingContext2D,
+  rain: number,
+  frame: number,
+  quality: RenderQuality = "high"
+): void {
   if (rain <= 0) return;
   ctx.strokeStyle = `rgba(185, 220, 236, ${0.12 + rain * 0.13})`;
   ctx.lineWidth = 1;
-  for (let i = 0; i < 70; i++) {
+  const dropCount = quality === "low" ? 24 : quality === "medium" ? 42 : 70;
+  ctx.beginPath();
+  for (let i = 0; i < dropCount; i++) {
     const x = ((i * 71 + frame * 3.1) % 500) - 25;
     const y = ((i * 43 + frame * 10.5) % 840) - 20;
-    ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x - 4 - rain * 3, y + 14 + rain * 8);
-    ctx.stroke();
   }
+  ctx.stroke();
 }
 
 export function drawPursuitDangerEffect(
@@ -103,7 +119,8 @@ export function drawPursuitDangerEffect(
   gameMinutes: number,
   playerX: number,
   playerY: number,
-  phase: number
+  phase: number,
+  quality: RenderQuality = "high"
 ): void {
   if (wanted < 20 && !hasActivePolice) return;
   const intensity = clamp(0.18 + ((wanted - 20) / 100) * 0.34 + (arrest / 100) * 0.58, 0, 1);
@@ -130,23 +147,26 @@ export function drawPursuitDangerEffect(
 
   // Kadrajın arkasından gelen tepe lambalarının geniş, hareketli silüeti.
   const sirenY = VH * (0.68 + sweep * 0.035);
-  g = ctx.createRadialGradient(VW * 0.18, sirenY, 2, VW * 0.18, sirenY, 205);
-  g.addColorStop(0, `rgba(255,35,46,${0.22 * intensity * redPulse})`);
-  g.addColorStop(0.3, `rgba(255,35,46,${0.07 * intensity * redPulse})`);
-  g.addColorStop(1, "rgba(255,35,46,0)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, sirenY - 210, VW * 0.62, 320);
+  if (quality !== "low") {
+    g = ctx.createRadialGradient(VW * 0.18, sirenY, 2, VW * 0.18, sirenY, 205);
+    g.addColorStop(0, `rgba(255,35,46,${0.22 * intensity * redPulse})`);
+    g.addColorStop(0.3, `rgba(255,35,46,${0.07 * intensity * redPulse})`);
+    g.addColorStop(1, "rgba(255,35,46,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, sirenY - 210, VW * 0.62, 320);
 
-  g = ctx.createRadialGradient(VW * 0.82, sirenY, 2, VW * 0.82, sirenY, 205);
-  g.addColorStop(0, `rgba(30,125,255,${0.24 * intensity * bluePulse})`);
-  g.addColorStop(0.3, `rgba(30,125,255,${0.08 * intensity * bluePulse})`);
-  g.addColorStop(1, "rgba(30,125,255,0)");
-  ctx.fillStyle = g;
-  ctx.fillRect(VW * 0.38, sirenY - 210, VW * 0.62, 320);
+    g = ctx.createRadialGradient(VW * 0.82, sirenY, 2, VW * 0.82, sirenY, 205);
+    g.addColorStop(0, `rgba(30,125,255,${0.24 * intensity * bluePulse})`);
+    g.addColorStop(0.3, `rgba(30,125,255,${0.08 * intensity * bluePulse})`);
+    g.addColorStop(1, "rgba(30,125,255,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(VW * 0.38, sirenY - 210, VW * 0.62, 320);
+  }
 
   // Merkezden dışarı kaçan kısa hız çizgileri, takibin ivmesini hissettirir.
   ctx.lineWidth = 1.25;
-  for (let i = 0; i < 16; i++) {
+  const speedLineCount = quality === "low" ? 6 : quality === "medium" ? 10 : 16;
+  for (let i = 0; i < speedLineCount; i++) {
     const side = i % 2 === 0 ? -1 : 1;
     const lane = Math.floor(i / 2);
     const y = HORIZON + 50 + ((lane * 97 + frame * (6.4 + intensity * 5)) % (VH - HORIZON - 30));
@@ -178,13 +198,15 @@ export function drawPursuitDangerEffect(
   // Oyuncu aracını merkezde açık bırakıp çevreyi sıkıştıran gerilim tüneli.
   // HUD bu katmandan sonra çizildiği için bilgi kontrastı etkilenmez.
   const focusY = playerY + 42;
-  g = ctx.createRadialGradient(playerX, focusY, 72, playerX, focusY, 410);
-  g.addColorStop(0, "rgba(0,3,7,0)");
-  g.addColorStop(0.38, `rgba(0,3,7,${0.025 * intensity})`);
-  g.addColorStop(0.72, `rgba(0,3,7,${0.14 * intensity})`);
-  g.addColorStop(1, `rgba(0,2,5,${0.34 * intensity})`);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, VW, VH);
+  if (quality !== "low") {
+    g = ctx.createRadialGradient(playerX, focusY, 72, playerX, focusY, 410);
+    g.addColorStop(0, "rgba(0,3,7,0)");
+    g.addColorStop(0.38, `rgba(0,3,7,${0.025 * intensity})`);
+    g.addColorStop(0.72, `rgba(0,3,7,${0.14 * intensity})`);
+    g.addColorStop(1, `rgba(0,2,5,${0.34 * intensity})`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, VW, VH);
+  }
 
   // Yakalanma yükseldikçe aracın çevresinde nabız gibi daralan ince bir tehdit halkası.
   const ringPulse = 0.5 + 0.5 * Math.sin(frame * 0.14);

@@ -19,6 +19,7 @@
   - Son viteste kulak tırmalamayan, tok ve kadife gibi kalibre edilmiş egzoz tınısı.
   - Ayarlardaki ses mikseri üzerinden ana ses, araç, ortam ve oyun efektlerini birbirinden bağımsız açıp kapatma.
 - **Canvas 2D Motoru**: 60 FPS akıcı piksel fiziği, dinamik araç trafik simülasyonu ve parçacık efektleri.
+- **Yaşayan Trafik Olayları**: Seyrek aralıklarla sinyal vererek şeride kıran veya arkadan yaklaşarak manevraya zorlayan araçlar. Olaylar önceden görsel olarak haber verir, polis takibiyle üst üste binmez ve başka aracın başlattığı temasta oyuncuya ihlal yazılmaz.
 - **İzmir Rotaları**: Konak Saat Kulesi, Alsancak Liman Hattı, Kordon boyu, Altınyol viyadükleri ve Karşıyaka sahil şeridi.
 - **Günün Evreleri & Hava Durumu**: Şafak, gündüz, akşam kızıllığı ve neon gece atmosferi; yağmurlu zeminlerde değişen yol tutuşu.
 - **Vardiya Mekanikleri**: Seri teslimat comboları, aşırı hız ihlalleri, aranma seviyesi ve peşine düşen polis takibi. Takip sırasında HUD sabit kalırken oyun dünyası kontrollü kamera zoom'u, hafif sarsıntı, hız çizgileri ve güçlendirilmiş kırmızı-mavi tepe lambası yansımalarıyla aksiyon kazanır.
@@ -85,10 +86,10 @@ Ekranın en altına yerleşen, başparmak ergonomisine uygun neon arcade kontrol
 
 ```bash
 # Depoyu klonla
-git clone https://github.com/tahsingibi/kurye-izmir.git
+git clone https://github.com/tahsingibi/kurye35-game.git
 
 # Proje dizinine gir
-cd kurye-izmir
+cd kurye35-game
 
 # Bağımlılıkları yükle
 npm install
@@ -154,5 +155,6 @@ Bu proje [MIT Lisansı](LICENSE) kapsamında lisanslanmıştır. Detaylar için 
 ## 👨‍💻 Geliştirici
 
 - **Geliştirici**: Tahsin Sungur
+- **GitHub**: [tahsingibi/kurye35-game](https://github.com/tahsingibi/kurye35-game)
 - **X (Twitter)**: [@tahsingibi](https://x.com/tahsingibi)
 - **Web**: [sungur.dev](https://sungur.dev)

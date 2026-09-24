@@ -1,7 +1,8 @@
 import { VW, VH, HORIZON } from "../constants";
 import { clamp, lerp, mixColor, getHour, daylight, twilight, nightLevel } from "../utils";
+import type { RenderQuality } from "../performance";
 
-export function drawSky(ctx: CanvasRenderingContext2D, gameMinutes: number, frame: number): void {
+export function drawSky(ctx: CanvasRenderingContext2D, gameMinutes: number, frame: number, quality: RenderQuality = "high"): void {
   const day = daylight(gameMinutes);
   const tw = twilight(gameMinutes);
   const night = nightLevel(gameMinutes);
@@ -18,15 +19,23 @@ export function drawSky(ctx: CanvasRenderingContext2D, gameMinutes: number, fram
   }
 
   // Gökyüzü gradyanı tüm arka planı kaplar ve ufukla kusursuz bütünleşir
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON + 90);
-  skyGrad.addColorStop(0, top);
-  skyGrad.addColorStop(0.65, mid);
-  skyGrad.addColorStop(1, low);
-  ctx.fillStyle = skyGrad;
-  ctx.fillRect(0, 0, VW, VH);
+  if (quality === "low") {
+    ctx.fillStyle = mid;
+    ctx.fillRect(0, 0, VW, VH);
+    ctx.fillStyle = low;
+    ctx.fillRect(0, HORIZON - 30, VW, VH - HORIZON + 30);
+  } else {
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON + 90);
+    skyGrad.addColorStop(0, top);
+    skyGrad.addColorStop(0.65, mid);
+    skyGrad.addColorStop(1, low);
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, VW, VH);
+  }
 
   // Bulutlar
-  for (let i = 0; i < 6; i++) {
+  const cloudCount = quality === "low" ? 3 : 6;
+  for (let i = 0; i < cloudCount; i++) {
     const x = ((i * 131 - frame * 0.035) % 650) - 90;
     const y = 25 + i * 25;
     ctx.fillStyle = `rgba(220, 235, 245, ${0.04 + day * 0.06})`;
@@ -37,7 +46,8 @@ export function drawSky(ctx: CanvasRenderingContext2D, gameMinutes: number, fram
 
   // Yıldızlar (Gece)
   if (night > 0.15) {
-    for (let i = 0; i < 36; i++) {
+    const starCount = quality === "low" ? 18 : quality === "medium" ? 28 : 36;
+    for (let i = 0; i < starCount; i++) {
       const x = (i * 73) % VW;
       const y = 14 + (i * 41) % (HORIZON - 40);
       const twinkle = Math.sin(frame * 0.05 + i) * 0.2 + 0.8;
@@ -56,13 +66,15 @@ export function drawSky(ctx: CanvasRenderingContext2D, gameMinutes: number, fram
     const sy = 140 - Math.sin(progress * Math.PI) * 95;
 
     // Güneş hare / halo
-    const sunGlow = ctx.createRadialGradient(sx, sy, 5, sx, sy, 50);
-    sunGlow.addColorStop(0, `rgba(255, 235, 170, ${0.4 * day + 0.2})`);
-    sunGlow.addColorStop(1, "rgba(255, 200, 100, 0)");
-    ctx.fillStyle = sunGlow;
-    ctx.beginPath();
-    ctx.arc(sx, sy, 50, 0, Math.PI * 2);
-    ctx.fill();
+    if (quality !== "low") {
+      const sunGlow = ctx.createRadialGradient(sx, sy, 5, sx, sy, 50);
+      sunGlow.addColorStop(0, `rgba(255, 235, 170, ${0.4 * day + 0.2})`);
+      sunGlow.addColorStop(1, "rgba(255, 200, 100, 0)");
+      ctx.fillStyle = sunGlow;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 50, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // Güneş gövdesi
     ctx.fillStyle = `rgba(255, 240, 190, ${0.6 + day * 0.4})`;
@@ -77,13 +89,15 @@ export function drawSky(ctx: CanvasRenderingContext2D, gameMinutes: number, fram
     const mx = 65 + mp * 330;
     const my = 60 + Math.sin(mp * Math.PI) * 22;
 
-    const moonGlow = ctx.createRadialGradient(mx, my, 8, mx, my, 40);
-    moonGlow.addColorStop(0, `rgba(255, 248, 220, ${0.25 * night})`);
-    moonGlow.addColorStop(1, "rgba(255, 248, 220, 0)");
-    ctx.fillStyle = moonGlow;
-    ctx.beginPath();
-    ctx.arc(mx, my, 40, 0, Math.PI * 2);
-    ctx.fill();
+    if (quality !== "low") {
+      const moonGlow = ctx.createRadialGradient(mx, my, 8, mx, my, 40);
+      moonGlow.addColorStop(0, `rgba(255, 248, 220, ${0.25 * night})`);
+      moonGlow.addColorStop(1, "rgba(255, 248, 220, 0)");
+      ctx.fillStyle = moonGlow;
+      ctx.beginPath();
+      ctx.arc(mx, my, 40, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.fillStyle = `rgba(255, 248, 220, ${0.5 + 0.45 * night})`;
     ctx.beginPath();

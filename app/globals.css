@@ -170,3 +170,17 @@ h1, h2, h3, .font-display {
 }
 
 .ui-rise { animation: ui-rise .42s cubic-bezier(.2,.8,.2,1) both; }
+
+/* Hareketli canvas üzerinde backdrop-filter, mobil GPU'da her kareyi yeniden
+   birleştirmeye zorlar. Dokunmatik cihazlarda opak zemin aynı okunabilirliği
+   çok daha düşük maliyetle sağlar. */
+@media (pointer: coarse) {
+  .game-viewport button {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .game-viewport::after {
+    mix-blend-mode: normal;
+  }
+}

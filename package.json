@@ -1,7 +1,11 @@
 {
-  "name": "kurye-izmir",
+  "name": "kurye35-game",
   "version": "1.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tahsingibi/kurye35-game.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

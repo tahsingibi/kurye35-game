@@ -23,17 +23,26 @@ export const TouchControls: React.FC<TouchControlsProps> = ({
   const [nosPercent, setNosPercent] = useState(engine.nos);
   const [isBoosting, setIsBoosting] = useState(engine.boosting);
 
-  // NOS durumunu buton üzerinde canlı güncellemek için animation frame
+  // Canvas kendi animasyon döngüsünü yönetiyor; React kontrol katmanını 10 Hz'de
+  // güncellemek düşük güçlü cihazlarda gereksiz yeniden render yükünü önler.
   useEffect(() => {
     if (!visible) return;
-    let animId: number;
+    let lastNos = Math.round(engine.nos);
+    let lastBoosting = engine.boosting;
     const updateNos = () => {
-      setNosPercent(Math.round(engine.nos));
-      setIsBoosting(engine.boosting);
-      animId = requestAnimationFrame(updateNos);
+      const nextNos = Math.round(engine.nos);
+      if (nextNos !== lastNos) {
+        lastNos = nextNos;
+        setNosPercent(nextNos);
+      }
+      if (engine.boosting !== lastBoosting) {
+        lastBoosting = engine.boosting;
+        setIsBoosting(lastBoosting);
+      }
     };
-    animId = requestAnimationFrame(updateNos);
-    return () => cancelAnimationFrame(animId);
+    updateNos();
+    const intervalId = window.setInterval(updateNos, 100);
+    return () => window.clearInterval(intervalId);
   }, [engine, visible]);
 
   const startSteer = useCallback((dir: "left" | "right") => {

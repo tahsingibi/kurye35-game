@@ -11,8 +11,12 @@ import {
   drawParcel,
 } from "../renderers/vehicles";
 
+export type TrafficBehavior = "normal" | "cutInWarning" | "cuttingIn" | "rearApproach";
+
 export class TrafficItem {
   lane: number;
+  lanePos: number;
+  targetLane: number;
   y: number;
   baseW: number;
   baseH: number;
@@ -23,9 +27,15 @@ export class TrafficItem {
   w = 0;
   h = 0;
   x = 0;
+  behavior: TrafficBehavior = "normal";
+  behaviorTimer = 0;
+  indicatorDirection: -1 | 0 | 1 = 0;
+  isTrafficEvent = false;
 
   constructor(forceType: TrafficType | null = null) {
     this.lane = Math.floor(Math.random() * 3);
+    this.lanePos = this.lane;
+    this.targetLane = this.lane;
     this.y = HORIZON + 2;
     this.baseW = 46;
     this.baseH = 70;
@@ -67,19 +77,66 @@ export class TrafficItem {
     const s = depthScale(this.y);
     this.w = this.baseW * s;
     this.h = this.baseH * s;
-    this.x = laneCenter(this.lane, this.y, frame, phase) - this.w / 2;
+    this.x = laneCenter(this.lanePos, this.y, frame, phase) - this.w / 2;
+  }
+
+  get isVehicle(): boolean {
+    return this.type === "taxi" || this.type === "sedan" || this.type === "van" || this.type === "bus";
+  }
+
+  startCutIn(targetLane: number): void {
+    if (!this.isVehicle || this.behavior !== "normal" || targetLane < 0 || targetLane > 2) return;
+    this.targetLane = targetLane;
+    this.indicatorDirection = targetLane > this.lanePos ? 1 : -1;
+    this.behavior = "cutInWarning";
+    this.behaviorTimer = 38;
+    this.isTrafficEvent = true;
+  }
+
+  startRearApproach(lane: number): void {
+    this.lane = lane;
+    this.lanePos = lane;
+    this.targetLane = lane;
+    this.y = 870;
+    this.behavior = "rearApproach";
+    this.behaviorTimer = 260;
+    this.isTrafficEvent = true;
   }
 
   update(baseSpeed: number, boosting: boolean, frame: number, phase: number): void {
+    if (this.behavior === "rearApproach") {
+      this.y -= 2.15 + Math.min(0.85, baseSpeed * 0.08) + (boosting ? 0.35 : 0);
+      this.behaviorTimer--;
+      if (this.y < HORIZON - 110 || this.behaviorTimer <= 0) this.dead = true;
+      this.updateBounds(frame, phase);
+      return;
+    }
+
     const speed = baseSpeed * (0.48 + roadT(this.y) * 0.94) * (boosting ? 1.34 : 1);
-    this.y += speed;
+    const eventSpeedScale = this.behavior === "cutInWarning" || this.behavior === "cuttingIn" ? 0.88 : 1;
+    this.y += speed * eventSpeedScale;
+
+    if (this.behavior === "cutInWarning") {
+      this.behaviorTimer--;
+      if (this.behaviorTimer <= 0) this.behavior = "cuttingIn";
+    } else if (this.behavior === "cuttingIn") {
+      const laneError = this.targetLane - this.lanePos;
+      const lateralStep = Math.sign(laneError) * Math.min(Math.abs(laneError), 0.026);
+      this.lanePos += lateralStep;
+      if (Math.abs(laneError) < 0.03) {
+        this.lanePos = this.targetLane;
+        this.lane = this.targetLane;
+        this.indicatorDirection = 0;
+        this.behavior = "normal";
+      }
+    }
     this.updateBounds(frame, phase);
   }
 
   draw(ctx: CanvasRenderingContext2D, frame: number, phase: number): void {
     const s = depthScale(this.y);
     ctx.save();
-    ctx.translate(laneCenter(this.lane, this.y, frame, phase), this.y);
+    ctx.translate(laneCenter(this.lanePos, this.y, frame, phase), this.y);
     ctx.scale(s, s);
 
     if (this.type === "parcel") drawParcel(ctx, frame);
@@ -89,6 +146,27 @@ export class TrafficItem {
     else if (this.type === "bus") drawBus(ctx);
     else if (this.type === "works") drawRoadworks(ctx);
     else if (this.type === "puddle") drawPuddle(ctx);
+
+    if ((this.behavior === "cutInWarning" || this.behavior === "cuttingIn") && Math.floor(frame / 7) % 2 === 0) {
+      const ix = this.indicatorDirection < 0 ? -19 : 19;
+      ctx.fillStyle = "#ffb21c";
+      ctx.shadowColor = "#ff9d00";
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(ix, 22, 3.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    if (this.behavior === "rearApproach") {
+      const headlightPulse = 0.72 + Math.sin(frame * 0.16) * 0.12;
+      ctx.fillStyle = `rgba(255,244,190,${headlightPulse})`;
+      ctx.shadowColor = "#fff2b0";
+      ctx.shadowBlur = 12;
+      ctx.fillRect(-17, -31, 8, 4);
+      ctx.fillRect(9, -31, 8, 4);
+      ctx.shadowBlur = 0;
+    }
 
     ctx.restore();
   }
