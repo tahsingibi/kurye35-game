@@ -86,10 +86,10 @@ Ekranın en altına yerleşen, başparmak ergonomisine uygun neon arcade kontrol
 
 ```bash
 # Depoyu klonla
-git clone https://github.com/tahsingibi/kurye-izmir.git
+git clone https://github.com/tahsingibi/kurye35-game.git
 
 # Proje dizinine gir
-cd kurye-izmir
+cd kurye35-game
 
 # Bağımlılıkları yükle
 npm install
@@ -155,5 +155,6 @@ Bu proje [MIT Lisansı](LICENSE) kapsamında lisanslanmıştır. Detaylar için 
 ## 👨‍💻 Geliştirici
 
 - **Geliştirici**: Tahsin Sungur
+- **GitHub**: [tahsingibi/kurye35-game](https://github.com/tahsingibi/kurye35-game)
 - **X (Twitter)**: [@tahsingibi](https://x.com/tahsingibi)
 - **Web**: [sungur.dev](https://sungur.dev)
