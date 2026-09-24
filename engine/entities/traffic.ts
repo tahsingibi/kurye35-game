@@ -11,7 +11,7 @@ import {
   drawParcel,
 } from "../renderers/vehicles";
 
-export type TrafficBehavior = "normal" | "cutInWarning" | "cuttingIn" | "rearApproach";
+export type TrafficBehavior = "normal" | "laneChangeWarning" | "changingLane";
 
 export class TrafficItem {
   lane: number;
@@ -31,6 +31,7 @@ export class TrafficItem {
   behaviorTimer = 0;
   indicatorDirection: -1 | 0 | 1 = 0;
   isTrafficEvent = false;
+  hasChangedLane = false;
 
   constructor(forceType: TrafficType | null = null) {
     this.lane = Math.floor(Math.random() * 3);
@@ -84,50 +85,34 @@ export class TrafficItem {
     return this.type === "taxi" || this.type === "sedan" || this.type === "van" || this.type === "bus";
   }
 
-  startCutIn(targetLane: number): void {
+  startLaneChange(targetLane: number): void {
     if (!this.isVehicle || this.behavior !== "normal" || targetLane < 0 || targetLane > 2) return;
     this.targetLane = targetLane;
     this.indicatorDirection = targetLane > this.lanePos ? 1 : -1;
-    this.behavior = "cutInWarning";
-    this.behaviorTimer = 38;
+    this.behavior = "laneChangeWarning";
+    this.behaviorTimer = 42;
     this.isTrafficEvent = true;
-  }
-
-  startRearApproach(lane: number): void {
-    this.lane = lane;
-    this.lanePos = lane;
-    this.targetLane = lane;
-    this.y = 870;
-    this.behavior = "rearApproach";
-    this.behaviorTimer = 260;
-    this.isTrafficEvent = true;
+    this.hasChangedLane = true;
   }
 
   update(baseSpeed: number, boosting: boolean, frame: number, phase: number): void {
-    if (this.behavior === "rearApproach") {
-      this.y -= 2.15 + Math.min(0.85, baseSpeed * 0.08) + (boosting ? 0.35 : 0);
-      this.behaviorTimer--;
-      if (this.y < HORIZON - 110 || this.behaviorTimer <= 0) this.dead = true;
-      this.updateBounds(frame, phase);
-      return;
-    }
-
     const speed = baseSpeed * (0.48 + roadT(this.y) * 0.94) * (boosting ? 1.34 : 1);
-    const eventSpeedScale = this.behavior === "cutInWarning" || this.behavior === "cuttingIn" ? 0.88 : 1;
+    const eventSpeedScale = this.behavior === "laneChangeWarning" || this.behavior === "changingLane" ? 0.94 : 1;
     this.y += speed * eventSpeedScale;
 
-    if (this.behavior === "cutInWarning") {
+    if (this.behavior === "laneChangeWarning") {
       this.behaviorTimer--;
-      if (this.behaviorTimer <= 0) this.behavior = "cuttingIn";
-    } else if (this.behavior === "cuttingIn") {
+      if (this.behaviorTimer <= 0) this.behavior = "changingLane";
+    } else if (this.behavior === "changingLane") {
       const laneError = this.targetLane - this.lanePos;
-      const lateralStep = Math.sign(laneError) * Math.min(Math.abs(laneError), 0.026);
+      const lateralStep = Math.sign(laneError) * Math.min(Math.abs(laneError), 0.018);
       this.lanePos += lateralStep;
       if (Math.abs(laneError) < 0.03) {
         this.lanePos = this.targetLane;
         this.lane = this.targetLane;
         this.indicatorDirection = 0;
         this.behavior = "normal";
+        this.isTrafficEvent = false;
       }
     }
     this.updateBounds(frame, phase);
@@ -147,7 +132,7 @@ export class TrafficItem {
     else if (this.type === "works") drawRoadworks(ctx);
     else if (this.type === "puddle") drawPuddle(ctx);
 
-    if ((this.behavior === "cutInWarning" || this.behavior === "cuttingIn") && Math.floor(frame / 7) % 2 === 0) {
+    if ((this.behavior === "laneChangeWarning" || this.behavior === "changingLane") && Math.floor(frame / 7) % 2 === 0) {
       const ix = this.indicatorDirection < 0 ? -19 : 19;
       ctx.fillStyle = "#ffb21c";
       ctx.shadowColor = "#ff9d00";
@@ -155,16 +140,6 @@ export class TrafficItem {
       ctx.beginPath();
       ctx.arc(ix, 22, 3.4, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0;
-    }
-
-    if (this.behavior === "rearApproach") {
-      const headlightPulse = 0.72 + Math.sin(frame * 0.16) * 0.12;
-      ctx.fillStyle = `rgba(255,244,190,${headlightPulse})`;
-      ctx.shadowColor = "#fff2b0";
-      ctx.shadowBlur = 12;
-      ctx.fillRect(-17, -31, 8, 4);
-      ctx.fillRect(9, -31, 8, 4);
       ctx.shadowBlur = 0;
     }
 

@@ -584,8 +584,8 @@ export class GameEngine {
       }
     }
 
-    // Seyrek ve okunabilir agresif trafik olayları.
-    // Polis takibiyle üst üste binmez; aynı anda yalnızca tek olay aktiftir.
+    // Öndeki trafik zaman zaman, sinyal vererek güvenli bir bitişik şeride geçer.
+    // Aynı araç ikinci kez manevra yapmaz ve aynı anda yalnızca tek şerit değişimi olur.
     this.trafficEventCooldown--;
     const hasTrafficEvent = this.items.some((item) => item.isTrafficEvent && !item.dead);
     if (
@@ -595,30 +595,34 @@ export class GameEngine {
       this.health > 35 &&
       !this.boosting
     ) {
-      const cutInCandidates = this.items.filter((item) =>
-        item.isVehicle &&
-        !item.isTrafficEvent &&
-        Math.abs(item.lanePos - this.player.lane) === 1 &&
-        item.y > this.player.y - 285 &&
-        item.y < this.player.y - 155
-      );
-      const canCutIn = cutInCandidates.length > 0 && Math.random() < 0.74;
-      const canApproachFromRear = this.driveFrames > 60 * 20 && Math.random() < 0.38;
+      const laneChangeCandidates = this.items.flatMap((item) => {
+        if (
+          !item.isVehicle ||
+          item.isTrafficEvent ||
+          item.hasChangedLane ||
+          item.y <= HORIZON + 55 ||
+          item.y >= this.player.y - 145
+        ) return [];
 
-      if (canCutIn) {
-        const item = cutInCandidates[Math.floor(Math.random() * cutInCandidates.length)];
-        item.startCutIn(this.player.lane);
-        this.addFloater("SİNYAL · ŞERİT DEĞİŞİMİ", item.x + item.w / 2, item.y - 14, "#ffd36d");
-        this.trafficEventCooldown = 60 * (18 + Math.floor(Math.random() * 11));
-      } else if (canApproachFromRear) {
-        const variants: Array<"taxi" | "sedan" | "van"> = ["taxi", "sedan", "van"];
-        const item = new TrafficItem(variants[Math.floor(Math.random() * variants.length)]);
-        item.startRearApproach(this.player.lane);
-        this.items.push(item);
-        this.setBanner("Arkadan araç yaklaşıyor", "Şeridini kontrol et, manevraya hazır ol.", "TRAFİK", "#ffbd5a", 145);
-        this.trafficEventCooldown = 60 * (22 + Math.floor(Math.random() * 9));
+        const adjacentLanes = [item.lane - 1, item.lane + 1].filter((lane) => {
+          if (lane < 0 || lane > 2) return false;
+          return !this.items.some((other) =>
+            other !== item &&
+            other.isVehicle &&
+            Math.abs(other.lanePos - lane) < 0.55 &&
+            Math.abs(other.y - item.y) < 125
+          );
+        });
+
+        return adjacentLanes.map((targetLane) => ({ item, targetLane }));
+      });
+
+      if (laneChangeCandidates.length > 0 && Math.random() < 0.68) {
+        const choice = laneChangeCandidates[Math.floor(Math.random() * laneChangeCandidates.length)];
+        choice.item.startLaneChange(choice.targetLane);
+        this.trafficEventCooldown = 60 * (16 + Math.floor(Math.random() * 11));
       } else {
-        this.trafficEventCooldown = 150 + Math.floor(Math.random() * 150);
+        this.trafficEventCooldown = 60 * (4 + Math.floor(Math.random() * 4));
       }
     }
 

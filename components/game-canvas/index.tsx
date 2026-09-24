@@ -133,10 +133,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           accumulator -= FIXED_STEP;
           guard++;
         }
-      } else {
+      } else if (
+        engine.state !== GameStateEnum.MENU &&
+        engine.state !== GameStateEnum.PAUSED
+      ) {
         engine.frame++;
         engine.roadScroll = (engine.roadScroll + 1.2) % (VH - 218);
         engine.worldDistance += 1.2;
+        accumulator = 0;
+      } else {
+        // Ana menü ve duraklatma ekranında dünya tamamen sabit kalır.
+        // Canvas yeniden çizilebilir, fakat oyun zamanı ve yol konumu ilerlemez.
         accumulator = 0;
       }
 
@@ -166,6 +173,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       if (engine.state === GameStateEnum.PLAYING || engine.state === GameStateEnum.PAUSED) {
         renderGameView(ctx, engine, renderProfile.quality);
+      } else if (engine.state === GameStateEnum.MENU) {
+        // Menü kendi tam ekran kapak görselini kullanır. Oyun dünyasını alta
+        // çizmek, yarı saydam katmanların arasından hayalet görüntü oluşturur.
+        ctx.fillStyle = "#02070a";
+        ctx.fillRect(0, 0, VW, VH);
       } else {
         renderBackground(ctx, engine, renderProfile.quality);
       }
