@@ -18,23 +18,32 @@ import { drawCanvasHUD } from "./renderers/hud";
 import { getPhaseInfo } from "./missions";
 import type { GameEngine } from "./game-engine";
 import { GameStateEnum } from "./types";
+import type { RenderQuality } from "./performance";
 
-export function renderBackground(ctx: CanvasRenderingContext2D, engine: GameEngine): void {
-  drawSky(ctx, engine.gameMinutes, engine.frame);
-  drawDistantSkyline(ctx, engine.gameMinutes, engine.routePhase);
+export function renderBackground(
+  ctx: CanvasRenderingContext2D,
+  engine: GameEngine,
+  quality: RenderQuality = "high"
+): void {
+  drawSky(ctx, engine.gameMinutes, engine.frame, quality);
+  drawDistantSkyline(ctx, engine.gameMinutes, engine.routePhase, quality);
   if (engine.routePhase === 1) {
     drawWaterfront(ctx, engine.gameMinutes);
   }
-  drawRoad(ctx, engine.gameMinutes, engine.frame, engine.routePhase, engine.roadScroll, engine.wet);
-  drawMovingBuildings(ctx, engine.worldDistance, engine.gameMinutes, engine.frame, engine.routePhase);
+  drawRoad(ctx, engine.gameMinutes, engine.frame, engine.routePhase, engine.roadScroll, engine.wet, quality);
+  drawMovingBuildings(ctx, engine.worldDistance, engine.gameMinutes, engine.frame, engine.routePhase, quality);
   drawApproachingRouteLandmark(ctx, engine.worldDistance, engine.gameMinutes, engine.frame, engine.routePhase);
   drawApproachingBridge(ctx, engine.worldDistance, engine.gameMinutes, engine.frame, engine.routePhase);
-  drawStreetFurniture(ctx, engine.gameMinutes, engine.frame, engine.routePhase, engine.roadScroll);
+  drawStreetFurniture(ctx, engine.gameMinutes, engine.frame, engine.routePhase, engine.roadScroll, quality);
   drawTimeAtmosphere(ctx, engine.gameMinutes);
-  drawRain(ctx, engine.rain, engine.frame);
+  drawRain(ctx, engine.rain, engine.frame, quality);
 }
 
-export function renderGameView(ctx: CanvasRenderingContext2D, engine: GameEngine): void {
+export function renderGameView(
+  ctx: CanvasRenderingContext2D,
+  engine: GameEngine,
+  quality: RenderQuality = "high"
+): void {
   const isChasing = engine.police.some((p) => !p.retiring);
   const pursuitActive = isChasing || engine.wanted >= 20 || engine.arrest > 0;
   const pursuitStrength = pursuitActive
@@ -70,8 +79,8 @@ export function renderGameView(ctx: CanvasRenderingContext2D, engine: GameEngine
     ctx.translate(-focusX, -focusY);
   }
 
-  renderBackground(ctx, engine);
-  drawHeadlightBeam(
+  renderBackground(ctx, engine, quality);
+  if (quality !== "low") drawHeadlightBeam(
     ctx,
     engine.player.x,
     engine.player.y,
@@ -113,10 +122,11 @@ export function renderGameView(ctx: CanvasRenderingContext2D, engine: GameEngine
     engine.gameMinutes,
     engine.player.x + engine.player.w / 2,
     engine.player.y,
-    engine.routePhase
+    engine.routePhase,
+    quality
   );
 
-  drawCockpitGrade(ctx);
+  drawCockpitGrade(ctx, quality);
 
   // HUD
   if (engine.state === GameStateEnum.PLAYING) {

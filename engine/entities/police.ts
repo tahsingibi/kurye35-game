@@ -47,14 +47,14 @@ export class PoliceUnit {
 
   laneClear(lane: number, items: TrafficItem[], lookAhead = 135): boolean {
     return !items.some(
-      (it) => it.type !== "parcel" && it.type !== "puddle" && Math.abs(it.lane - lane) < 0.45 && it.y < this.y && this.y - it.y < lookAhead
+      (it) => it.type !== "parcel" && it.type !== "puddle" && Math.abs(it.lanePos - lane) < 0.45 && it.y < this.y && this.y - it.y < lookAhead
     );
   }
 
   chooseTargetLane(player: Player, items: TrafficItem[]): void {
     let desired = player.lane;
     const blocking = items.find(
-      (it) => it.type !== "parcel" && it.type !== "puddle" && Math.abs(it.lane - desired) < 0.45 && it.y < this.y && this.y - it.y < 150
+      (it) => it.type !== "parcel" && it.type !== "puddle" && Math.abs(it.lanePos - desired) < 0.45 && it.y < this.y && this.y - it.y < 150
     );
     if (blocking && this.y - blocking.y > 72) {
       const choices = [desired - 1, desired + 1].filter((l) => l >= 0 && l <= 2 && this.laneClear(l, items, 120));

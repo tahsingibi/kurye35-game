@@ -27,6 +27,7 @@ export class GameEngine {
   combo = 0;
   comboFrames = 0;
   trafficTimer = 0;
+  trafficEventCooldown = 900;
 
   wanted = 0;
   arrest = 0;
@@ -301,6 +302,7 @@ export class GameEngine {
   damage(item: TrafficItem): void {
     if (this.player.invuln > 0) return;
     let d = item.type === "bus" ? 46 : item.type === "works" ? 35 : item.type === "van" ? 31 : item.type === "puddle" ? 14 : 27;
+    if (item.isTrafficEvent) d = Math.round(d * 0.72);
 
     // Otomobil dayanıklılık mekaniği: Motorlara kıyasla %50 daha dayanıklı!
     if (this.vehicleType === "car") {
@@ -313,10 +315,12 @@ export class GameEngine {
     this.flash = 12;
     this.combo = 0;
     this.comboFrames = 0;
-    this.registerViolation(item.type === "puddle" ? 5 : 24, item.type === "puddle" ? "Kontrol kaybı" : "Trafik kazası");
+    if (!item.isTrafficEvent) {
+      this.registerViolation(item.type === "puddle" ? 5 : 24, item.type === "puddle" ? "Kontrol kaybı" : "Trafik kazası");
+    }
     playSound("hit");
     this.addParticle(this.player.x + this.player.w / 2, this.player.y + 45, 26, "#ff754f");
-    this.addFloater(item.type === "puddle" ? "Kaydın!" : `-${d}%`, this.player.x + this.player.w / 2, this.player.y - 12, "#ff9c8e");
+    this.addFloater(item.isTrafficEvent ? `TRAFİK TEMASI -${d}%` : item.type === "puddle" ? "Kaydın!" : `-${d}%`, this.player.x + this.player.w / 2, this.player.y - 12, "#ff9c8e");
     if (this.health <= 0) this.endGame("crash");
   }
 
@@ -349,6 +353,7 @@ export class GameEngine {
     this.combo = 0;
     this.comboFrames = 0;
     this.trafficTimer = 90;
+    this.trafficEventCooldown = 900;
     this.wanted = 0;
     this.arrest = 0;
     this.pursuitCleanFrames = 0;
@@ -463,15 +468,19 @@ export class GameEngine {
     this.player.update(this.rain, this.frame, this.routePhase);
 
     // Dinamik Araç Motor Sesi & Ortam Ambiyansı Güncellemesi
-    updateEngineSound(
-      this.baseSpeed,
-      this.controls.throttle,
-      this.controls.brake,
-      this.boosting,
-      this.vehicleType,
-      this.rain,
-      nightLevel(this.gameMinutes)
-    );
+    // WebAudio otomasyonları 20 Hz'de yeterince akıcıdır; her fizik adımında
+    // göndermek özellikle düşük güçlü mobil CPU'larda gereksiz ana-thread yükü oluşturur.
+    if (this.frame % 3 === 0) {
+      updateEngineSound(
+        this.baseSpeed,
+        this.controls.throttle,
+        this.controls.brake,
+        this.boosting,
+        this.vehicleType,
+        this.rain,
+        nightLevel(this.gameMinutes)
+      );
+    }
 
     // NOS
     if (this.boosting) {
@@ -575,8 +584,46 @@ export class GameEngine {
       }
     }
 
+    // Seyrek ve okunabilir agresif trafik olayları.
+    // Polis takibiyle üst üste binmez; aynı anda yalnızca tek olay aktiftir.
+    this.trafficEventCooldown--;
+    const hasTrafficEvent = this.items.some((item) => item.isTrafficEvent && !item.dead);
+    if (
+      this.trafficEventCooldown <= 0 &&
+      !hasTrafficEvent &&
+      this.wanted < 20 &&
+      this.health > 35 &&
+      !this.boosting
+    ) {
+      const cutInCandidates = this.items.filter((item) =>
+        item.isVehicle &&
+        !item.isTrafficEvent &&
+        Math.abs(item.lanePos - this.player.lane) === 1 &&
+        item.y > this.player.y - 285 &&
+        item.y < this.player.y - 155
+      );
+      const canCutIn = cutInCandidates.length > 0 && Math.random() < 0.74;
+      const canApproachFromRear = this.driveFrames > 60 * 20 && Math.random() < 0.38;
+
+      if (canCutIn) {
+        const item = cutInCandidates[Math.floor(Math.random() * cutInCandidates.length)];
+        item.startCutIn(this.player.lane);
+        this.addFloater("SİNYAL · ŞERİT DEĞİŞİMİ", item.x + item.w / 2, item.y - 14, "#ffd36d");
+        this.trafficEventCooldown = 60 * (18 + Math.floor(Math.random() * 11));
+      } else if (canApproachFromRear) {
+        const variants: Array<"taxi" | "sedan" | "van"> = ["taxi", "sedan", "van"];
+        const item = new TrafficItem(variants[Math.floor(Math.random() * variants.length)]);
+        item.startRearApproach(this.player.lane);
+        this.items.push(item);
+        this.setBanner("Arkadan araç yaklaşıyor", "Şeridini kontrol et, manevraya hazır ol.", "TRAFİK", "#ffbd5a", 145);
+        this.trafficEventCooldown = 60 * (22 + Math.floor(Math.random() * 9));
+      } else {
+        this.trafficEventCooldown = 150 + Math.floor(Math.random() * 150);
+      }
+    }
+
     for (const i of this.items) i.update(this.baseSpeed, this.boosting, this.frame, this.routePhase);
-    this.items = this.items.filter((i) => i.y < VH + 120);
+    this.items = this.items.filter((i) => !i.dead && i.y < VH + 120);
 
     // Collisions
     handlePoliceTrafficCollisions(this.police, this.items, (p) => {

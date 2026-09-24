@@ -9,6 +9,11 @@ import { GameStateEnum } from "@/engine/types";
 import { TouchControls } from "@/components/touch-controls";
 import { JoystickPosition, ButtonSize } from "@/utils/settings";
 import { PauseIcon } from "@/components/ui/icons";
+import {
+  downgradeRenderProfile,
+  getInitialRenderProfile,
+  type RenderProfile,
+} from "@/engine/performance";
 
 interface GameCanvasProps {
   engine: GameEngine;
@@ -47,16 +52,26 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const isTouchDev =
+      window.matchMedia("(pointer: coarse)").matches ||
+      "ontouchstart" in window ||
+      (Boolean(navigator.maxTouchPoints) && navigator.maxTouchPoints > 0);
+    let renderProfile: RenderProfile = getInitialRenderProfile(isTouchDev);
+    let renderCostTotal = 0;
+    let renderCostSamples = 0;
+    let rafDeltaTotal = 0;
+    let rafDeltaSamples = 0;
+    let slowRafFrames = 0;
+
     const handleResize = () => {
-      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
       const scale = Math.min(window.innerWidth / VW, window.innerHeight / VH);
       const w = VW * scale;
       const h = VH * scale;
 
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
+      canvas.width = Math.round(w * renderProfile.pixelRatio);
+      canvas.height = Math.round(h * renderProfile.pixelRatio);
     };
 
     handleResize();
@@ -65,10 +80,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const inputMgr = new InputManager(engine, canvas);
     inputMgrRef.current = inputMgr;
 
-    const isTouchDev =
-      window.matchMedia("(pointer: coarse)").matches ||
-      "ontouchstart" in window ||
-      (Boolean(navigator.maxTouchPoints) && navigator.maxTouchPoints > 0);
     engine.isTouchDevice = isTouchDev;
     setIsTouch(isTouchDev);
     if (isTouchDev) inputMgr.joystickMode = true;
@@ -83,12 +94,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     let animationFrameId: number;
     let lastTime = 0;
+    let renderAccumulator = 0;
     let accumulator = 0;
 
     const gameLoop = (timestamp: number) => {
       if (!lastTime) lastTime = timestamp;
       const delta = Math.min(50, Math.max(0, timestamp - lastTime));
       lastTime = timestamp;
+      renderAccumulator += delta;
+
+      // Canvas komutlarının GPU maliyeti her tarayıcıda performance.now()'a tam
+      // yansımaz. Gerçek RAF aralığı da izlenerek düşen kareler yakalanır.
+      if (engine.state === GameStateEnum.PLAYING && renderProfile.quality !== "low" && delta > 0) {
+        rafDeltaTotal += delta;
+        rafDeltaSamples++;
+        if (delta > 22) slowRafFrames++;
+        if (rafDeltaSamples >= 90) {
+          const averageRafDelta = rafDeltaTotal / rafDeltaSamples;
+          const slowFrameRatio = slowRafFrames / rafDeltaSamples;
+          if (averageRafDelta > 20.5 || slowFrameRatio > 0.08) {
+            renderProfile = downgradeRenderProfile(renderProfile);
+            handleResize();
+            renderCostTotal = 0;
+            renderCostSamples = 0;
+            renderAccumulator = 1000 / renderProfile.playingFps;
+          }
+          rafDeltaTotal = 0;
+          rafDeltaSamples = 0;
+          slowRafFrames = 0;
+        }
+      }
 
       if (engine.state === GameStateEnum.PLAYING) {
         accumulator += delta;
@@ -105,9 +140,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         accumulator = 0;
       }
 
-      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      const targetFps = engine.state === GameStateEnum.PLAYING
+        ? renderProfile.playingFps
+        : renderProfile.idleFps;
+      const renderInterval = 1000 / targetFps;
+      if (renderAccumulator < renderInterval - 1) {
+        animationFrameId = requestAnimationFrame(gameLoop);
+        return;
+      }
+      renderAccumulator %= renderInterval;
+
+      const renderStartedAt = performance.now();
       const currentWidth = parseFloat(canvas.style.width) || VW;
-      const s = (currentWidth / VW) * dpr;
+      const s = (currentWidth / VW) * renderProfile.pixelRatio;
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -120,11 +165,27 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
 
       if (engine.state === GameStateEnum.PLAYING || engine.state === GameStateEnum.PAUSED) {
-        renderGameView(ctx, engine);
+        renderGameView(ctx, engine, renderProfile.quality);
       } else {
-        renderBackground(ctx, engine);
+        renderBackground(ctx, engine, renderProfile.quality);
       }
       ctx.restore();
+
+      // Canvas maliyetini seyrek örnekleyip cihaz zorlanıyorsa kaliteyi tek yönlü düşür.
+      // Histerezis (90 örnek) çözünürlüğün ileri geri sıçramasını engeller.
+      renderCostTotal += performance.now() - renderStartedAt;
+      renderCostSamples++;
+      if (renderCostSamples >= 90 && renderProfile.quality !== "low") {
+        const averageRenderCost = renderCostTotal / renderCostSamples;
+        const budget = 1000 / renderProfile.playingFps;
+        if (averageRenderCost > budget * 0.72) {
+          renderProfile = downgradeRenderProfile(renderProfile);
+          handleResize();
+          renderAccumulator = 1000 / renderProfile.playingFps;
+        }
+        renderCostTotal = 0;
+        renderCostSamples = 0;
+      }
 
       animationFrameId = requestAnimationFrame(gameLoop);
     };

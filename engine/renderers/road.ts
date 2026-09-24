@@ -1,5 +1,6 @@
 import { VW, VH, HORIZON } from "../constants";
 import { clamp, lerp, mixColor, daylight, twilight, nightLevel, roadT, roadCenter, roadHalf } from "../utils";
+import type { RenderQuality } from "../performance";
 
 export function drawRoad(
   ctx: CanvasRenderingContext2D,
@@ -7,7 +8,8 @@ export function drawRoad(
   frame: number,
   phase: number,
   roadScroll: number,
-  wet: number
+  wet: number,
+  quality: RenderQuality = "high"
 ): void {
   const day = daylight(gameMinutes);
   const tw = twilight(gameMinutes);
@@ -17,13 +19,16 @@ export function drawRoad(
   let groundSkyTone = mixColor("#1b2a36", "#c5bba8", day);
   if (tw > 0.02) groundSkyTone = mixColor(groundSkyTone, "#b06056", tw * 0.7);
 
-  const groundGrad = ctx.createLinearGradient(0, HORIZON - 25, 0, VH);
-  groundGrad.addColorStop(0, groundSkyTone);
-  groundGrad.addColorStop(0.08, mixColor("#131a22", "#353f46", day * 0.5));
-  groundGrad.addColorStop(0.35, mixColor("#0a0e13", "#1e2429", day * 0.45));
-  groundGrad.addColorStop(1, "#05070a");
-
-  ctx.fillStyle = groundGrad;
+  if (quality === "low") {
+    ctx.fillStyle = mixColor("#0a0e13", "#283136", day * 0.42);
+  } else {
+    const groundGrad = ctx.createLinearGradient(0, HORIZON - 25, 0, VH);
+    groundGrad.addColorStop(0, groundSkyTone);
+    groundGrad.addColorStop(0.08, mixColor("#131a22", "#353f46", day * 0.5));
+    groundGrad.addColorStop(0.35, mixColor("#0a0e13", "#1e2429", day * 0.45));
+    groundGrad.addColorStop(1, "#05070a");
+    ctx.fillStyle = groundGrad;
+  }
   ctx.fillRect(0, HORIZON - 10, VW, VH - HORIZON + 10);
 
   // 2. Yol banketleri / Otoyol şevi (Yolun zemine doğrudan oturmasını sağlayan yumuşak geçiş)
@@ -50,21 +55,29 @@ export function drawRoad(
   ctx.lineTo(cxBot - halfBot, VH);
   ctx.closePath();
 
-  const rg = ctx.createLinearGradient(0, HORIZON, 0, VH);
-  rg.addColorStop(0, mixColor("#202b31", "#505b60", day * 0.55));
-  rg.addColorStop(0.35, mixColor("#151e23", "#3b464a", day * 0.48));
-  rg.addColorStop(1, mixColor("#091014", "#252e31", day * 0.42));
-  ctx.fillStyle = rg;
+  if (quality === "low") {
+    ctx.fillStyle = mixColor("#11191e", "#384247", day * 0.46);
+  } else {
+    const rg = ctx.createLinearGradient(0, HORIZON, 0, VH);
+    rg.addColorStop(0, mixColor("#202b31", "#505b60", day * 0.55));
+    rg.addColorStop(0.35, mixColor("#151e23", "#3b464a", day * 0.48));
+    rg.addColorStop(1, mixColor("#091014", "#252e31", day * 0.42));
+    ctx.fillStyle = rg;
+  }
   ctx.fill();
 
   // 4. Islak asfalt yansıması
   if (wet > 0.05) {
     ctx.save();
     ctx.clip();
-    const wg = ctx.createLinearGradient(0, HORIZON, 0, VH);
-    wg.addColorStop(0, "rgba(120,160,180,.02)");
-    wg.addColorStop(1, `rgba(87,132,154,${0.14 * wet})`);
-    ctx.fillStyle = wg;
+    if (quality === "low") {
+      ctx.fillStyle = `rgba(87,132,154,${0.08 * wet})`;
+    } else {
+      const wg = ctx.createLinearGradient(0, HORIZON, 0, VH);
+      wg.addColorStop(0, "rgba(120,160,180,.02)");
+      wg.addColorStop(1, `rgba(87,132,154,${0.14 * wet})`);
+      ctx.fillStyle = wg;
+    }
     ctx.fillRect(0, HORIZON, VW, VH - HORIZON);
     ctx.restore();
   }
@@ -93,8 +106,9 @@ export function drawRoad(
   }
 
   // 6. Şerit çizgileri
+  const laneMarkCount = quality === "low" ? 10 : quality === "medium" ? 14 : 18;
   for (let divider = 0.5; divider <= 1.5; divider += 1) {
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < laneMarkCount; i++) {
       const offset = (roadScroll * 2.1) % (VH - HORIZON);
       const y = HORIZON + ((i * 55 + offset) % (VH - HORIZON));
       const t = roadT(y);
@@ -116,7 +130,8 @@ export function drawRoad(
   }
 
   // 7. Yol dokusu
-  for (let i = 0; i < 28; i++) {
+  const textureCount = quality === "low" ? 8 : quality === "medium" ? 18 : 28;
+  for (let i = 0; i < textureCount; i++) {
     const y = HORIZON + ((i * 67 + roadScroll * 0.8) % (VH - HORIZON));
     const t = roadT(y);
     const x = roadCenter(y, frame, phase) + (((i * 97) % 100) / 100 - 0.5) * roadHalf(y) * 1.5;
@@ -125,7 +140,8 @@ export function drawRoad(
   }
 
   // 8. Reflektörler
-  for (let i = 0; i < 11; i++) {
+  const reflectorCount = quality === "low" ? 6 : quality === "medium" ? 8 : 11;
+  for (let i = 0; i < reflectorCount; i++) {
     const y = HORIZON + ((i * 78 + roadScroll * 1.7) % (VH - HORIZON));
     const t = roadT(y);
     for (const side of [-1, 1]) {
@@ -138,8 +154,9 @@ export function drawRoad(
   }
 
   // 9. Islak zemin gece ışık yansımaları
-  if (wet > 0.35) {
-    for (let i = 0; i < 7; i++) {
+  if (wet > 0.35 && quality !== "low") {
+    const reflectionCount = quality === "medium" ? 4 : 7;
+    for (let i = 0; i < reflectionCount; i++) {
       const y = 430 + i * 58 + ((roadScroll * 0.8) % 58);
       const t = roadT(y);
       const x = roadCenter(y, frame, phase) + (i % 2 ? -0.6 : 0.6) * roadHalf(y);
@@ -152,13 +169,17 @@ export function drawRoad(
   }
 
   // 10. UFUK SİSİ VE ATMOSFERİK ENTEGRASYON (Yolun gökyüzüyle ve binalarla kusursuz birleşimi)
-  const hazeGrad = ctx.createLinearGradient(0, HORIZON - 35, 0, HORIZON + 45);
   const fogColor = night > 0.25 ? "14, 20, 28" : "190, 205, 220";
-  hazeGrad.addColorStop(0, `rgba(${fogColor}, 0)`);
-  hazeGrad.addColorStop(0.45, `rgba(${fogColor}, ${0.35 + (1 - night) * 0.25})`);
-  hazeGrad.addColorStop(0.7, `rgba(${fogColor}, ${0.2 + (1 - night) * 0.15})`);
-  hazeGrad.addColorStop(1, `rgba(${fogColor}, 0)`);
-  ctx.fillStyle = hazeGrad;
+  if (quality === "low") {
+    ctx.fillStyle = `rgba(${fogColor}, ${0.12 + (1 - night) * 0.1})`;
+  } else {
+    const hazeGrad = ctx.createLinearGradient(0, HORIZON - 35, 0, HORIZON + 45);
+    hazeGrad.addColorStop(0, `rgba(${fogColor}, 0)`);
+    hazeGrad.addColorStop(0.45, `rgba(${fogColor}, ${0.35 + (1 - night) * 0.25})`);
+    hazeGrad.addColorStop(0.7, `rgba(${fogColor}, ${0.2 + (1 - night) * 0.15})`);
+    hazeGrad.addColorStop(1, `rgba(${fogColor}, 0)`);
+    ctx.fillStyle = hazeGrad;
+  }
   ctx.fillRect(0, HORIZON - 35, VW, 80);
 }
 
@@ -167,10 +188,12 @@ export function drawStreetFurniture(
   gameMinutes: number,
   frame: number,
   phase: number,
-  roadScroll: number
+  roadScroll: number,
+  quality: RenderQuality = "high"
 ): void {
   const night = nightLevel(gameMinutes);
-  for (let i = 0; i < 7; i++) {
+  const furnitureCount = quality === "low" ? 3 : quality === "medium" ? 5 : 7;
+  for (let i = 0; i < furnitureCount; i++) {
     const y = HORIZON + 35 + ((i * 112 + roadScroll * 1.45) % (VH - HORIZON - 20));
     const t = roadT(y);
     for (const side of [-1, 1]) {
@@ -187,7 +210,7 @@ export function drawStreetFurniture(
       ctx.stroke();
 
       ctx.fillStyle = `rgba(255,215,125,${0.08 + 0.92 * night})`;
-      ctx.shadowBlur = 12 * night;
+      ctx.shadowBlur = quality === "low" ? 0 : 12 * night;
       ctx.shadowColor = "#ffd77d";
       ctx.beginPath();
       ctx.arc(-side * 10, -31, 3.5, 0, Math.PI * 2);

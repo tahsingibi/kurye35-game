@@ -73,10 +73,18 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
+                var refreshingForNewWorker = false;
+                navigator.serviceWorker.addEventListener('controllerchange', function() {
+                  if (refreshingForNewWorker) return;
+                  refreshingForNewWorker = true;
+                  window.location.reload();
+                });
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                    console.log('SW registration failed: ', err);
-                  });
+                  navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+                    .then(function(registration) { return registration.update(); })
+                    .catch(function(err) {
+                      console.log('SW registration failed: ', err);
+                    });
                 });
               }
             `,

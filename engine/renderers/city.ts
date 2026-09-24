@@ -1,5 +1,6 @@
 import { VW, VH, HORIZON } from "../constants";
 import { clamp, lerp, mixColor, daylight, nightLevel, roadT, roadCenter, roadHalf, approachDepth } from "../utils";
+import type { RenderQuality } from "../performance";
 
 // ==========================================
 // 1. İZMİR YOL KENARI PERSPEKTİF SİLÜETLERİ
@@ -353,13 +354,18 @@ export function drawMovingBuildings(
   worldDistance: number,
   gameMinutes: number,
   frame: number,
-  phase: number
+  phase: number,
+  quality: RenderQuality = "high"
 ): void {
   const day = daylight(gameMinutes);
   const night = nightLevel(gameMinutes);
 
   // 6 farklı mesafe offseti ile sürekli sağdan ve soldan yaklaşım
-  const offsets = [40, 195, 360, 520, 680, 840];
+  const offsets = quality === "low"
+    ? [40, 360, 680]
+    : quality === "medium"
+      ? [40, 195, 360, 680]
+      : [40, 195, 360, 520, 680, 840];
   const cycle = 1000;
 
   for (let i = 0; i < offsets.length; i++) {
@@ -408,7 +414,12 @@ export function drawMovingBuildings(
 // ==========================================
 // 3. UZAK ŞEHİR SİLÜETİ VE KÖRFEZ
 // ==========================================
-export function drawDistantSkyline(ctx: CanvasRenderingContext2D, gameMinutes: number, phase: number): void {
+export function drawDistantSkyline(
+  ctx: CanvasRenderingContext2D,
+  gameMinutes: number,
+  phase: number,
+  quality: RenderQuality = "high"
+): void {
   const day = daylight(gameMinutes);
   const night = nightLevel(gameMinutes);
 
@@ -447,13 +458,17 @@ export function drawDistantSkyline(ctx: CanvasRenderingContext2D, gameMinutes: n
   for (let i = 0; i < skylineBuildings.length; i++) {
     const b = skylineBuildings[i];
     const topY = HORIZON - b.h;
-    const bGrad = ctx.createLinearGradient(b.x, topY, b.x, HORIZON);
-    bGrad.addColorStop(0, mixColor(i % 2 ? "#182430" : "#121a24", i % 2 ? "#6f7d8c" : "#5a6876", day * 0.52));
-    bGrad.addColorStop(1, mixColor("#080c12", "#283038", day * 0.4));
-    ctx.fillStyle = bGrad;
+    if (quality === "low") {
+      ctx.fillStyle = mixColor(i % 2 ? "#182430" : "#121a24", i % 2 ? "#596773" : "#4b5965", day * 0.46);
+    } else {
+      const bGrad = ctx.createLinearGradient(b.x, topY, b.x, HORIZON);
+      bGrad.addColorStop(0, mixColor(i % 2 ? "#182430" : "#121a24", i % 2 ? "#6f7d8c" : "#5a6876", day * 0.52));
+      bGrad.addColorStop(1, mixColor("#080c12", "#283038", day * 0.4));
+      ctx.fillStyle = bGrad;
+    }
     ctx.fillRect(b.x, topY, b.w, b.h + 8);
 
-    if (night > 0.18) {
+    if (night > 0.18 && quality !== "low") {
       for (let wy = topY + 8; wy < HORIZON - 2; wy += 9) {
         for (let wx = b.x + 4; wx < b.x + b.w - 3; wx += 6) {
           if ((wx + wy + i) % 4 === 0) {

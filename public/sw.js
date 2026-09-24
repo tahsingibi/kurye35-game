@@ -1,4 +1,4 @@
-const CACHE_NAME = "kurye35-v3-offline-art-fonts";
+const CACHE_NAME = "kurye35-v4-performance";
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
@@ -49,6 +49,21 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  // Navigasyonlarda ağı öncelemek yeni deploy edilen HTML ve hash'li JS
+  // dosyalarının cihaza ilk online açılışta ulaşmasını sağlar.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put("/", responseToCache));
+        }
+        return networkResponse;
+      }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("/")))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -74,11 +89,6 @@ self.addEventListener("fetch", (event) => {
         });
 
         return networkResponse;
-      }).catch(() => {
-        // Çevrimdışı fallback: ana sayfayı döndür
-        if (event.request.mode === "navigate") {
-          return caches.match("/");
-        }
       });
     })
   );
